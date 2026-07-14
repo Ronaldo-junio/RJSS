@@ -703,11 +703,16 @@ def _get_dias_existentes(escalas):
 
 # ── Inicialização ─────────────────────────────────────────────────────────────
 
-if __name__ == '__main__':
+def init_admin():
     users = load_users()
     if 'admin' not in users:
         os.makedirs(os.path.dirname(USERS_FILE), exist_ok=True)
         users['admin'] = {'senha': generate_password_hash('admin123'), 'papel': 'admin'}
         save_users(users)
         print('Admin criado — senha padrão: admin123')
-    app.run(debug=True, port=5000)
+
+init_admin()
+
+if __name__ == '__main__':
+    port = int(os.environ.get('PORT', 5000))
+    app.run(debug=False, host='0.0.0.0', port=port)
