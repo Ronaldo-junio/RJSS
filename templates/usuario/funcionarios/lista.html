@@ -1,0 +1,67 @@
+{% extends 'base.html' %}
+{% block titulo %}Funcionários{% endblock %}
+
+{% block nav_extra %}
+  <a href="/RJSS_Sistemas_Integrados/usuario/{{ username }}/">Início</a>
+{% endblock %}
+
+{% block conteudo %}
+<div class="page-header">
+  <h1>Funcionários</h1>
+  <a href="/RJSS_Sistemas_Integrados/usuario/{{ username }}/funcionarios/novo/" class="btn btn-verde">+ Novo funcionário</a>
+</div>
+
+{% if funcionarios %}
+<div class="tabela-wrap">
+  <table>
+    <thead>
+      <tr>
+        <th>Nome</th>
+        <th>Cargo principal</th>
+        <th>Cargo secundário</th>
+        <th>Turno</th>
+        <th>Admissão</th>
+        <th>Situação</th>
+        <th></th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for f in funcionarios %}
+      <tr>
+        <td><strong>{{ f.nome }}</strong></td>
+        <td>{{ cargos.get(f.cargo_primario, f.cargo_primario) }}</td>
+        <td>{{ cargos.get(f.cargo_secundario, '—') if f.cargo_secundario else '—' }}</td>
+        <td>{{ f.turno | title }}</td>
+        <td>{{ f.data_admissao }}</td>
+        <td>
+          {% if f.ferias_inicio and f.ferias_fim %}
+            <span class="badge badge-feriado">Férias</span>
+          {% elif f.atestados %}
+            <span class="badge badge-intermediario">Atestado</span>
+          {% else %}
+            <span class="badge badge-titular">Ativo</span>
+          {% endif %}
+        </td>
+        <td>
+          <div style="display:flex;gap:0.4rem;">
+            <a href="/RJSS_Sistemas_Integrados/usuario/{{ username }}/funcionarios/{{ f.id }}/" class="btn btn-azul btn-sm">Ver</a>
+            <a href="/RJSS_Sistemas_Integrados/usuario/{{ username }}/funcionarios/{{ f.id }}/editar/" class="btn btn-cinza btn-sm">Editar</a>
+            <form method="POST" action="/RJSS_Sistemas_Integrados/usuario/{{ username }}/funcionarios/{{ f.id }}/excluir/"
+                  onsubmit="return confirm('Excluir {{ f.nome }}?')">
+              <button type="submit" class="btn btn-vermelho btn-sm">Excluir</button>
+            </form>
+          </div>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% else %}
+<div class="card" style="text-align:center; padding:3rem; color:#8b949e;">
+  <div style="font-size:2.5rem; margin-bottom:1rem;">👥</div>
+  <p>Nenhum funcionário cadastrado ainda.</p>
+  <a href="/RJSS_Sistemas_Integrados/usuario/{{ username }}/funcionarios/novo/" class="btn btn-verde" style="margin-top:1rem;">Cadastrar primeiro funcionário</a>
+</div>
+{% endif %}
+{% endblock %}

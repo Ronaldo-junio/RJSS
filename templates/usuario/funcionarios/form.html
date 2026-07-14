@@ -1,0 +1,201 @@
+{% extends 'base.html' %}
+{% block titulo %}{{ 'Editar' if func else 'Novo' }} Funcionário{% endblock %}
+
+{% block nav_extra %}
+  <a href="/RJSS_Sistemas_Integrados/usuario/{{ username }}/">Início</a>
+  <a href="/RJSS_Sistemas_Integrados/usuario/{{ username }}/funcionarios/">Funcionários</a>
+{% endblock %}
+
+{% block conteudo %}
+<div class="page-header">
+  <h1>{{ 'Editar: ' + func.nome if func else 'Novo funcionário' }}</h1>
+</div>
+
+<div class="card">
+  <form method="POST">
+
+    <p class="secao-titulo">Dados pessoais e cargo</p>
+    <div class="form-grid">
+      <div class="form-group full">
+        <label>Nome completo *</label>
+        <input type="text" name="nome" value="{{ func.nome if func else '' }}" required autofocus />
+      </div>
+      <div class="form-group">
+        <label>Data de admissão *</label>
+        <input type="date" name="data_admissao" value="{{ func.data_admissao if func else '' }}" required />
+      </div>
+      <div class="form-group">
+        <label>Turno fixo *</label>
+        <select name="turno">
+          <option value="manha" {{ 'selected' if func and func.turno == 'manha' }}>Manhã</option>
+          <option value="tarde" {{ 'selected' if func and func.turno == 'tarde' }}>Tarde</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Cargo principal *</label>
+        <select name="cargo_primario">
+          <option value="">— Selecionar —</option>
+          {% for cod, nome in cargos.items() %}
+            <option value="{{ cod }}" {{ 'selected' if func and func.cargo_primario == cod }}>{{ nome }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Cargo secundário</label>
+        <select name="cargo_secundario">
+          <option value="">— Nenhum —</option>
+          {% for cod, nome in cargos.items() %}
+            <option value="{{ cod }}" {{ 'selected' if func and func.cargo_secundario == cod }}>{{ nome }}</option>
+          {% endfor %}
+        </select>
+      </div>
+    </div>
+
+    <hr style="border:none; border-top:1px solid #21262d; margin:1.5rem 0;" />
+
+    <p class="secao-titulo">Escala de folgas — Domingos</p>
+    <p style="font-size:0.82rem; color:#8b949e; margin-bottom:1rem;">
+      Configure o ciclo de folgas de domingo no formato <strong style="color:#e6edf3;">folga{N} trabalha{M}</strong>.
+      Por exemplo: folga{1} trabalha{2} = folga 1 domingo, trabalha 2, repete o ciclo.
+    </p>
+    <div class="form-grid">
+      <div class="form-group">
+        <label>Domingos de folga por ciclo (N)</label>
+        <select name="domingos_folga">
+          {% for n in range(1, 5) %}
+          <option value="{{ n }}" {{ 'selected' if func and func.get('domingos_folga', 1) == n else ('selected' if not func and n == 1) }}>{{ n }} domingo{{ 's' if n > 1 }} de folga</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Domingos trabalhados por ciclo (M)</label>
+        <select name="rotacao_domingo">
+          {% for m in range(1, 6) %}
+          <option value="{{ m }}" {{ 'selected' if func and func.get('rotacao_domingo', 2) == m else ('selected' if not func and m == 2) }}>{{ m }} domingo{{ 's' if m > 1 }} trabalhado{{ 's' if m > 1 }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Domingo de referência (data de início de folga no ciclo)</label>
+        <input type="date" name="domingo_ref" value="{{ func.domingo_ref or '' if func else '' }}"
+               placeholder="Informe um domingo de folga já ocorrido" />
+      </div>
+      <div class="form-group">
+        <label>Dia da semana de folga (acompanha o domingo)</label>
+        <select name="folga_semana">
+          <option value="">— Nenhum —</option>
+          {% set dias_label = [('segunda','Segunda'),('terca','Terça'),('quarta','Quarta'),('quinta','Quinta'),('sexta','Sexta'),('sabado','Sábado')] %}
+          {% for cod, label in dias_label %}
+            <option value="{{ cod }}" {{ 'selected' if func and func.get('folga_semana') == cod }}>{{ label }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="form-group">
+        <div class="checkbox-row" style="margin-top:1.5rem;">
+          <input type="checkbox" id="folga_feriado" name="folga_feriado"
+            {{ 'checked' if func and func.get('folga_feriado') }} />
+          <label for="folga_feriado">Folga em feriados (não escalar)</label>
+        </div>
+      </div>
+    </div>
+
+    <div class="form-grid" style="margin-top:1rem;">
+      <div class="form-group">
+        <label>Férias — início</label>
+        <input type="date" name="ferias_inicio" value="{{ func.ferias_inicio or '' if func else '' }}" />
+      </div>
+      <div class="form-group">
+        <label>Férias — fim</label>
+        <input type="date" name="ferias_fim" value="{{ func.ferias_fim or '' if func else '' }}" />
+      </div>
+    </div>
+
+    <hr style="border:none; border-top:1px solid #21262d; margin:1.5rem 0;" />
+
+    <p class="secao-titulo">Preferências de caixa (somente operadores de caixa)</p>
+    <div class="form-grid">
+      <div class="form-group">
+        <label>Velocidade no caixa</label>
+        <select name="velocidade">
+          <option value="normal" {{ 'selected' if not func or func.get('velocidade', 'normal') == 'normal' }}>Normal</option>
+          <option value="rapido" {{ 'selected' if func and func.get('velocidade') == 'rapido' }}>Rápido</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Caixa fixo (opcional)</label>
+        <select name="caixa_fixo" id="caixa-fixo-select">
+          <option value="">— Sem fixação (rodízio normal) —</option>
+        </select>
+        <p style="font-size:0.78rem; color:#8b949e; margin-top:0.3rem;">
+          Se preenchido, este operador será sempre alocado neste caixa quando disponível.
+          Use apenas em casos específicos solicitados pelo funcionário.
+        </p>
+      </div>
+      <div class="form-group full">
+        <label>Caixas preferidos (marque os que prefere ou tem mais habilidade)</label>
+        <div class="checkboxes" id="caixas-preferidos-lista">
+          <span style="font-size:0.82rem; color:#484f58;">Cadastre os caixas em Configurações para selecioná-los aqui.</span>
+        </div>
+        <input type="hidden" name="caixas_preferidos" value="" id="caixas-input-dummy" />
+      </div>
+    </div>
+
+    <script>
+      const caixaFixoAtual = {{ (func.caixa_fixo if func and func.caixa_fixo else 'null') | tojson }};
+      fetch(window.location.pathname.replace(/\/funcionarios\/.*/, '/gerar-escalas/caixas-json/'))
+        .then(r => r.json()).then(caixas => {
+          const container = document.getElementById('caixas-preferidos-lista');
+          const fixoSelect = document.getElementById('caixa-fixo-select');
+          if (!caixas.length) return;
+
+          container.innerHTML = '';
+          const preferidos = {{ (func.caixas_preferidos if func else []) | tojson }};
+          const tipoLabel = { preferencial: 'Preferencial', normal: 'Normal', rapido: 'Rápido' };
+
+          caixas.forEach(cx => {
+            // Checkboxes de preferidos
+            const label = document.createElement('label');
+            const checked = preferidos.includes(cx.id) ? 'checked' : '';
+            label.innerHTML = `<input type="checkbox" name="caixas_preferidos" value="${cx.id}" ${checked} /> Caixa ${cx.numero} — ${tipoLabel[cx.tipo] || cx.tipo}`;
+            container.appendChild(label);
+
+            // Select de caixa fixo
+            const opt = document.createElement('option');
+            opt.value = cx.id;
+            opt.textContent = `Caixa ${cx.numero} — ${tipoLabel[cx.tipo] || cx.tipo}`;
+            if (cx.id === caixaFixoAtual) opt.selected = true;
+            fixoSelect.appendChild(opt);
+          });
+        }).catch(() => {});
+    </script>
+
+    <hr style="border:none; border-top:1px solid #21262d; margin:1.5rem 0;" />
+
+    <p class="secao-titulo">Restrições e observações</p>
+    <div class="form-grid">
+      <div class="form-group full">
+        <label>Restrições (ex.: gestante, laudo médico, limitação física)</label>
+        <textarea name="restricoes">{{ func.restricoes if func else '' }}</textarea>
+      </div>
+      <div class="form-group full">
+        <label>Avaliações de desempenho</label>
+        <textarea name="avaliacoes">{{ func.avaliacoes if func else '' }}</textarea>
+      </div>
+      <div class="form-group full">
+        <label>Recomendações</label>
+        <textarea name="recomendacoes">{{ func.recomendacoes if func else '' }}</textarea>
+      </div>
+      <div class="form-group full">
+        <label>Observações gerais</label>
+        <textarea name="observacoes">{{ func.observacoes if func else '' }}</textarea>
+      </div>
+    </div>
+
+    <div class="form-acoes">
+      <a href="/RJSS_Sistemas_Integrados/usuario/{{ username }}/funcionarios/" class="btn btn-cinza">Cancelar</a>
+      <button type="submit" class="btn btn-verde">{{ 'Salvar alterações' if func else 'Cadastrar funcionário' }}</button>
+    </div>
+
+  </form>
+</div>
+{% endblock %}

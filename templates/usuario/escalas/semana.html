@@ -1,0 +1,169 @@
+{% extends 'base.html' %}
+{% block titulo %}Escala {{ escala.data_inicio }}{% endblock %}
+
+{% block nav_extra %}
+  <a href="/RJSS_Sistemas_Integrados/usuario/{{ username }}/">Início</a>
+  <a href="/RJSS_Sistemas_Integrados/usuario/{{ username }}/escalas/">Escalas</a>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+  .dia-card { background:#161b22; border:1px solid #30363d; border-radius:10px; margin-bottom:1rem; overflow:hidden; }
+  .dia-header { background:#21262d; padding:0.7rem 1rem; display:flex; align-items:center; justify-content:space-between; }
+  .dia-header .data { font-weight:700; color:#e6edf3; }
+  .dia-header .dia-semana { font-size:0.8rem; color:#8b949e; text-transform:capitalize; }
+  .dia-header .feriado-badge { background:rgba(163,113,247,0.2); color:#a371f7; font-size:0.75rem; padding:0.15rem 0.5rem; border-radius:10px; border:1px solid #a371f7; }
+  .turno-bloco { padding:0.8rem 1rem; border-top:1px solid #21262d; }
+  .turno-titulo { font-size:0.72rem; font-weight:700; text-transform:uppercase; letter-spacing:0.05em; color:#8b949e; margin-bottom:0.6rem; display:flex; align-items:center; gap:0.5rem; }
+  .turno-titulo .horario { font-weight:400; color:#484f58; }
+  .cargo-linha { display:flex; align-items:flex-start; gap:0.5rem; margin-bottom:0.4rem; font-size:0.85rem; }
+  .cargo-nome { color:#8b949e; min-width:150px; flex-shrink:0; }
+  .funcionarios-lista { display:flex; flex-wrap:wrap; gap:0.4rem; }
+  .func-chip { display:inline-flex; align-items:center; gap:0.3rem; padding:0.2rem 0.6rem; border-radius:12px; font-size:0.78rem; font-weight:500; }
+  .chip-titular     { background:rgba(63,185,80,0.12); border:1px solid rgba(63,185,80,0.3); color:#3fb950; }
+  .chip-sub         { background:rgba(227,179,65,0.12); border:1px solid rgba(227,179,65,0.3); color:#e3b341; }
+  .chip-intermediario { background:rgba(248,81,73,0.12); border:1px solid rgba(248,81,73,0.3); color:#f85149; }
+  .chip-feriado     { background:rgba(163,113,247,0.12); border:1px solid rgba(163,113,247,0.3); color:#a371f7; }
+  .chip-vaga        { background:rgba(139,148,158,0.1); border:1px dashed #484f58; color:#8b949e; }
+  .chip-manual      { background:rgba(88,166,255,0.12); border:1px solid rgba(88,166,255,0.3); color:#58a6ff; }
+
+  /* Painel de seleção de impressão */
+  #painel-print { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.6); z-index:999; align-items:center; justify-content:center; }
+  #painel-print.aberto { display:flex; }
+  .print-modal { background:#161b22; border:1px solid #30363d; border-radius:12px; padding:1.5rem; min-width:320px; max-width:480px; width:90%; }
+  .print-modal h3 { margin:0 0 1rem; color:#e6edf3; font-size:1rem; }
+  .print-dias-lista { display:flex; flex-direction:column; gap:0.5rem; margin-bottom:1.2rem; }
+  .print-dia-item { display:flex; align-items:center; gap:0.6rem; cursor:pointer; padding:0.35rem 0.6rem; border-radius:6px; border:1px solid #30363d; transition:background 0.15s; }
+  .print-dia-item:hover { background:#21262d; }
+  .print-dia-item input[type=checkbox] { accent-color:#3fb950; width:15px; height:15px; cursor:pointer; }
+  .print-dia-item label { cursor:pointer; color:#e6edf3; font-size:0.88rem; flex:1; }
+  .print-dia-item .dia-badge { font-size:0.72rem; color:#8b949e; text-transform:capitalize; }
+  .print-acoes { display:flex; gap:0.6rem; flex-wrap:wrap; }
+  .print-acoes .btn-sel { font-size:0.78rem; color:#8b949e; background:none; border:none; cursor:pointer; padding:0; text-decoration:underline; }
+</style>
+{% endblock %}
+
+{% block conteudo %}
+<div class="page-header">
+  <h1>Escala: {{ escala.data_inicio }} — {{ escala.data_fim }}</h1>
+  <div style="display:flex;gap:0.5rem;flex-wrap:wrap;">
+    <a href="/RJSS_Sistemas_Integrados/usuario/{{ username }}/escalas/{{ escala.id }}/imprimir/" class="btn btn-cinza" target="_blank">🖨 Imprimir tudo</a>
+    <button class="btn btn-cinza" onclick="abrirPainelPrint()">📅 Selecionar dias</button>
+    <a href="/RJSS_Sistemas_Integrados/usuario/{{ username }}/escalas/" class="btn btn-cinza">← Voltar</a>
+  </div>
+</div>
+
+{# Painel de seleção de impressão #}
+<div id="painel-print">
+  <div class="print-modal">
+    <h3>Selecionar dias para imprimir</h3>
+    <div class="print-dias-lista">
+      {% for data_str, dia in escala.dias.items() %}
+      <div class="print-dia-item">
+        <input type="checkbox" id="chk_{{ data_str }}" value="{{ data_str }}" checked>
+        <label for="chk_{{ data_str }}">
+          {{ data_str }}
+          <span class="dia-badge">— {{ dia.dia_semana | replace('terca','Terça') | replace('segunda','Segunda') | replace('quarta','Quarta') | replace('quinta','Quinta') | replace('sexta','Sexta') | replace('sabado','Sábado') | replace('domingo','Domingo') }}</span>
+          {% if dia.get('feriado') %}<span style="color:#a371f7;font-size:0.72rem;"> ★ Feriado</span>{% endif %}
+        </label>
+      </div>
+      {% endfor %}
+    </div>
+    <div class="print-acoes">
+      <button class="btn" onclick="imprimirSelecionados()">🖨 Imprimir selecionados</button>
+      <button class="btn btn-cinza" onclick="fecharPainelPrint()">Cancelar</button>
+      <button class="btn-sel" onclick="marcarTodos(true)">Marcar todos</button>
+      <button class="btn-sel" onclick="marcarTodos(false)">Desmarcar todos</button>
+    </div>
+  </div>
+</div>
+
+{% if escala.alertas %}
+<div class="alerta aviso">
+  <strong>Alertas desta escala:</strong><br>
+  {% for a in escala.alertas %}{{ a }}<br>{% endfor %}
+</div>
+{% endif %}
+
+{% for data_str, dia in escala.dias.items() %}
+<div class="dia-card">
+  <div class="dia-header">
+    <div>
+      <span class="data">{{ data_str }}</span>
+      <span class="dia-semana"> — {{ dia.dia_semana | replace('terca','Terça') | replace('segunda','Segunda') | replace('quarta','Quarta') | replace('quinta','Quinta') | replace('sexta','Sexta') | replace('sabado','Sábado') | replace('domingo','Domingo') }}</span>
+    </div>
+    {% if dia.get('feriado') %}
+      <span class="feriado-badge">🎉 Feriado</span>
+    {% endif %}
+  </div>
+
+  {% for turno_nome, turno in dia.turnos.items() %}
+  <div class="turno-bloco">
+    <div class="turno-titulo">
+      {{ turno_nome | title }}
+      <span class="horario">{{ turno.horario }}</span>
+    </div>
+
+    {% for cargo_cod, cargo_dados in turno.cargos.items() %}
+    <div class="cargo-linha">
+      <span class="cargo-nome">{{ cargo_dados.nome }}</span>
+      <div class="funcionarios-lista">
+        {% for f in cargo_dados.funcionarios %}
+          {% set caixa_label = ' — Cx ' + f.caixa_numero|string if (f.caixa_numero is defined and f.caixa_numero and f.caixa_numero != '?') else '' %}
+          {% set destino_label = ' → ' + f.destino if f.get('destino') else '' %}
+          {% if f.tipo == 'titular' %}
+            <span class="func-chip chip-titular">{{ f.nome }}{{ caixa_label }}{{ destino_label }}</span>
+          {% elif f.tipo in ('substituto_secundario', 'substituto_outro_turno') %}
+            <span class="func-chip chip-sub" title="{{ f.get('obs', '') }}">⚠ {{ f.nome }}{{ caixa_label }}{{ destino_label }}</span>
+          {% elif f.tipo in ('intermediario',) %}
+            <span class="func-chip chip-intermediario" title="{{ f.get('obs', '') }}">↕ {{ f.nome }}{{ caixa_label }}{{ destino_label }}</span>
+          {% elif f.tipo == 'feriado' %}
+            <span class="func-chip chip-feriado">{{ f.nome }}{{ caixa_label }}{{ destino_label }}</span>
+          {% elif f.tipo == 'manual' %}
+            <span class="func-chip chip-manual">{{ f.nome }}{{ caixa_label }}{{ destino_label }}</span>
+          {% elif 'vaga' in f.tipo %}
+            <span class="func-chip chip-vaga">{{ f.nome }}</span>
+          {% else %}
+            <span class="func-chip chip-sub">{{ f.nome }}{{ caixa_label }}</span>
+          {% endif %}
+        {% endfor %}
+      </div>
+    </div>
+    {% endfor %}
+
+  </div>
+  {% endfor %}
+</div>
+{% endfor %}
+
+<div style="margin-top:1rem; display:flex; gap:1rem; flex-wrap:wrap; font-size:0.82rem; color:#8b949e;">
+  <span><span class="func-chip chip-titular">Titular</span> cargo principal no turno fixo</span>
+  <span><span class="func-chip chip-sub">⚠ Substituto</span> cargo secundário ou de outro turno</span>
+  <span><span class="func-chip chip-intermediario">↕ Intermediário</span> cobertura extra de turno</span>
+  <span><span class="func-chip chip-manual">Manual</span> alocação manual</span>
+  <span><span class="func-chip chip-vaga">VAGA</span> sem cobertura disponível</span>
+</div>
+
+<script>
+  var BASE_PRINT = "/RJSS_Sistemas_Integrados/usuario/{{ username }}/escalas/{{ escala.id }}/imprimir/";
+
+  function abrirPainelPrint() {
+    document.getElementById('painel-print').classList.add('aberto');
+  }
+  function fecharPainelPrint() {
+    document.getElementById('painel-print').classList.remove('aberto');
+  }
+  function marcarTodos(val) {
+    document.querySelectorAll('#painel-print input[type=checkbox]').forEach(function(c){ c.checked = val; });
+  }
+  function imprimirSelecionados() {
+    var selecionados = Array.from(document.querySelectorAll('#painel-print input[type=checkbox]:checked')).map(function(c){ return c.value; });
+    if (selecionados.length === 0) { alert('Selecione ao menos um dia.'); return; }
+    window.open(BASE_PRINT + '?dias=' + selecionados.join(','), '_blank');
+    fecharPainelPrint();
+  }
+  document.getElementById('painel-print').addEventListener('click', function(e) {
+    if (e.target === this) fecharPainelPrint();
+  });
+</script>
+{% endblock %}

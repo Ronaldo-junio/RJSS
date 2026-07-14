@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Adicionar Usuário — RJSS Sistemas Integrados</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      background-color: #0d1117;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      color: #e6edf3;
+    }
+
+    header {
+      background: #161b22;
+      border-bottom: 1px solid #30363d;
+      padding: 1rem 2rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    header .titulo { font-size: 1.1rem; font-weight: 700; color: #58a6ff; }
+
+    header a {
+      font-size: 0.85rem;
+      color: #8b949e;
+      text-decoration: none;
+    }
+
+    header a:hover { color: #e6edf3; }
+
+    .conteudo {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 2rem;
+    }
+
+    .card {
+      background: #161b22;
+      border: 1px solid #30363d;
+      border-radius: 12px;
+      padding: 2.5rem 2rem;
+      width: 100%;
+      max-width: 420px;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+    }
+
+    .card h2 {
+      font-size: 1.2rem;
+      margin-bottom: 1.5rem;
+      color: #e6edf3;
+    }
+
+    .alerta {
+      border-radius: 6px;
+      padding: 0.6rem 1rem;
+      font-size: 0.85rem;
+      margin-bottom: 1.2rem;
+    }
+
+    .alerta.erro { background: rgba(248, 81, 73, 0.15); border: 1px solid #f85149; color: #f85149; }
+
+    .form-group { margin-bottom: 1.2rem; }
+
+    .form-group label {
+      display: block;
+      font-size: 0.85rem;
+      color: #8b949e;
+      margin-bottom: 0.4rem;
+    }
+
+    .form-group input,
+    .form-group select {
+      width: 100%;
+      padding: 0.65rem 0.9rem;
+      background: #0d1117;
+      border: 1px solid #30363d;
+      border-radius: 6px;
+      color: #e6edf3;
+      font-size: 0.95rem;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+
+    .form-group input:focus,
+    .form-group select:focus { border-color: #58a6ff; }
+
+    .acoes {
+      display: flex;
+      gap: 0.8rem;
+      margin-top: 0.5rem;
+    }
+
+    .btn {
+      flex: 1;
+      padding: 0.7rem;
+      border: none;
+      border-radius: 6px;
+      font-size: 0.95rem;
+      font-weight: 600;
+      cursor: pointer;
+      text-align: center;
+      text-decoration: none;
+      display: inline-block;
+      transition: background 0.2s;
+    }
+
+    .btn-verde { background: #238636; color: #fff; }
+    .btn-verde:hover { background: #2ea043; }
+    .btn-cinza { background: #21262d; color: #8b949e; }
+    .btn-cinza:hover { background: #30363d; color: #e6edf3; }
+
+    footer {
+      text-align: center;
+      padding: 1rem;
+      font-size: 0.8rem;
+      color: #8b949e;
+      border-top: 1px solid #21262d;
+      line-height: 1.8;
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <span class="titulo">RJSS — Adicionar Usuário</span>
+    <a href="/RJSS_Sistemas_Integrados/admin/">← Voltar ao painel</a>
+  </header>
+
+  <div class="conteudo">
+    <div class="card">
+      <h2>Novo usuário</h2>
+
+      {% with msgs = get_flashed_messages(with_categories=true) %}
+        {% for cat, msg in msgs %}
+          <div class="alerta {{ cat }}">{{ msg }}</div>
+        {% endfor %}
+      {% endwith %}
+
+      <form method="POST">
+        <div class="form-group">
+          <label for="usuario">Nome de usuário</label>
+          <input type="text" id="usuario" name="usuario" placeholder="ex: joao.silva" required autofocus />
+        </div>
+        <div class="form-group">
+          <label for="senha">Senha</label>
+          <input type="password" id="senha" name="senha" placeholder="Defina uma senha" required />
+        </div>
+        <div class="form-group">
+          <label for="papel">Perfil</label>
+          <select id="papel" name="papel">
+            <option value="usuario">Usuário</option>
+            <option value="admin">Administrador</option>
+          </select>
+        </div>
+        <div class="acoes">
+          <a href="/RJSS_Sistemas_Integrados/admin/" class="btn btn-cinza">Cancelar</a>
+          <button type="submit" class="btn btn-verde">Criar usuário</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <footer>
+    =============<br>
+    RJSS-Sistemas Integrados<br>
+    ronaldojuniosilvasantos@gmail.com<br>
+    =============
+  </footer>
+
+</body>
+</html>

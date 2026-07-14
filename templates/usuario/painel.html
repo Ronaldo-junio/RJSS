@@ -1,0 +1,36 @@
+{% extends 'base.html' %}
+{% block titulo %}Início{% endblock %}
+
+{% block conteudo %}
+<div class="page-header">
+  <h1>Bem-vindo, {{ username }}!</h1>
+</div>
+
+<div style="display:grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap:1rem;">
+
+  <a href="/RJSS_Sistemas_Integrados/usuario/{{ username }}/funcionarios/" style="text-decoration:none;">
+    <div class="card" style="cursor:pointer; transition: border-color 0.2s;" onmouseover="this.style.borderColor='#58a6ff'" onmouseout="this.style.borderColor='#30363d'">
+      <div style="font-size:2rem; margin-bottom:0.7rem;">👤</div>
+      <div style="font-size:1.1rem; font-weight:700; color:#58a6ff; margin-bottom:0.4rem;">Funcionários</div>
+      <div style="font-size:0.85rem; color:#8b949e;">Cadastre e gerencie os dados de cada funcionário: cargos, turnos, folgas, férias, atestados e observações.</div>
+    </div>
+  </a>
+
+  <a href="/RJSS_Sistemas_Integrados/usuario/{{ username }}/escalas/" style="text-decoration:none;">
+    <div class="card" style="cursor:pointer; transition: border-color 0.2s;" onmouseover="this.style.borderColor='#3fb950'" onmouseout="this.style.borderColor='#30363d'">
+      <div style="font-size:2rem; margin-bottom:0.7rem;">📋</div>
+      <div style="font-size:1.1rem; font-weight:700; color:#3fb950; margin-bottom:0.4rem;">Escalas</div>
+      <div style="font-size:0.85rem; color:#8b949e;">Visualize todas as escalas já geradas, semana a semana, com opção de impressão.</div>
+    </div>
+  </a>
+
+  <a href="/RJSS_Sistemas_Integrados/usuario/{{ username }}/gerar-escalas/" style="text-decoration:none;">
+    <div class="card" style="cursor:pointer; transition: border-color 0.2s;" onmouseover="this.style.borderColor='#e3b341'" onmouseout="this.style.borderColor='#30363d'">
+      <div style="font-size:2rem; margin-bottom:0.7rem;">⚙️</div>
+      <div style="font-size:1.1rem; font-weight:700; color:#e3b341; margin-bottom:0.4rem;">Gerar Escalas</div>
+      <div style="font-size:0.85rem; color:#8b949e;">Gere novas escalas automaticamente respeitando turnos, folgas, substituições e feriados.</div>
+    </div>
+  </a>
+
+</div>
+{% endblock %}

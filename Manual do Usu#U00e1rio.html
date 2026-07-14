@@ -1,0 +1,951 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Manual do Usuário — RJSS Sistemas Integrados</title>
+  <style>
+    :root {
+      --bg: #0d1117; --bg2: #161b22; --bg3: #21262d;
+      --border: #30363d; --border2: #21262d;
+      --text: #e6edf3; --muted: #8b949e; --faint: #484f58;
+      --blue: #58a6ff; --green: #3fb950; --red: #f85149;
+      --yellow: #e3b341; --purple: #a371f7;
+    }
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      font-size: 15px;
+      line-height: 1.7;
+      display: flex;
+    }
+
+    /* ── Sidebar ── */
+    #sidebar {
+      width: 260px;
+      min-height: 100vh;
+      background: var(--bg2);
+      border-right: 1px solid var(--border);
+      position: fixed;
+      top: 0; left: 0; bottom: 0;
+      overflow-y: auto;
+      padding: 1.5rem 0 2rem;
+      z-index: 100;
+    }
+    #sidebar .brand {
+      display: flex; align-items: center; gap: 0.6rem;
+      padding: 0 1.2rem 1.2rem;
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 1rem;
+    }
+    #sidebar .brand img { width: 32px; height: 32px; border-radius: 6px; }
+    #sidebar .brand span { font-weight: 700; color: var(--blue); font-size: 0.95rem; line-height: 1.2; }
+
+    #sidebar nav a {
+      display: flex; align-items: center; gap: 0.5rem;
+      padding: 0.4rem 1.2rem;
+      font-size: 0.85rem;
+      color: var(--muted);
+      text-decoration: none;
+      border-radius: 0;
+      transition: background 0.15s, color 0.15s;
+    }
+    #sidebar nav a:hover { background: var(--bg3); color: var(--text); }
+    #sidebar nav a.active { color: var(--blue); background: rgba(88,166,255,0.08); border-right: 2px solid var(--blue); }
+    #sidebar nav .nav-section {
+      font-size: 0.7rem; font-weight: 700; text-transform: uppercase;
+      letter-spacing: 0.08em; color: var(--faint);
+      padding: 1rem 1.2rem 0.3rem;
+    }
+
+    /* ── Main ── */
+    #main {
+      margin-left: 260px;
+      flex: 1;
+      max-width: 860px;
+      padding: 2.5rem 2.5rem 4rem;
+    }
+
+    /* Hero */
+    .hero {
+      display: flex; align-items: center; gap: 1.5rem;
+      background: linear-gradient(135deg, rgba(88,166,255,0.08) 0%, rgba(63,185,80,0.05) 100%);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 2rem;
+      margin-bottom: 2.5rem;
+    }
+    .hero img { width: 80px; height: 80px; flex-shrink: 0; }
+    .hero h1 { font-size: 1.6rem; color: var(--text); margin-bottom: 0.3rem; }
+    .hero p { color: var(--muted); font-size: 0.92rem; }
+
+    /* Seções */
+    section { margin-bottom: 3rem; }
+    h2 {
+      font-size: 1.2rem; color: var(--text);
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 0.6rem; margin-bottom: 1.2rem;
+      display: flex; align-items: center; gap: 0.5rem;
+    }
+    h3 { font-size: 1rem; color: var(--blue); margin: 1.4rem 0 0.6rem; }
+    h4 { font-size: 0.9rem; color: var(--yellow); margin: 1rem 0 0.4rem; }
+    p { margin-bottom: 0.8rem; color: var(--text); }
+    strong { color: var(--text); font-weight: 600; }
+
+    /* Cards de passo */
+    .steps { display: flex; flex-direction: column; gap: 0.8rem; margin: 1rem 0; }
+    .step {
+      display: flex; gap: 1rem; align-items: flex-start;
+      background: var(--bg2); border: 1px solid var(--border);
+      border-radius: 8px; padding: 0.9rem 1rem;
+    }
+    .step-num {
+      width: 28px; height: 28px; border-radius: 50%;
+      background: var(--blue); color: #0d1117;
+      font-weight: 700; font-size: 0.82rem;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0; margin-top: 0.1rem;
+    }
+    .step-body { flex: 1; }
+    .step-body strong { display: block; margin-bottom: 0.2rem; }
+    .step-body p { margin: 0; font-size: 0.88rem; color: var(--muted); }
+
+    /* Callouts */
+    .callout {
+      border-radius: 8px; padding: 0.9rem 1.1rem;
+      margin: 1rem 0; font-size: 0.88rem;
+      display: flex; gap: 0.7rem; align-items: flex-start;
+    }
+    .callout-icon { font-size: 1.1rem; flex-shrink: 0; margin-top: 0.05rem; }
+    .callout.info    { background: rgba(88,166,255,0.08);  border: 1px solid rgba(88,166,255,0.25); color: #93c5fd; }
+    .callout.tip     { background: rgba(63,185,80,0.08);   border: 1px solid rgba(63,185,80,0.25);  color: #86efac; }
+    .callout.warning { background: rgba(227,179,65,0.08);  border: 1px solid rgba(227,179,65,0.25); color: #fde68a; }
+    .callout.danger  { background: rgba(248,81,73,0.08);   border: 1px solid rgba(248,81,73,0.25);  color: #fca5a5; }
+
+    /* Tabelas */
+    .table-wrap { border: 1px solid var(--border); border-radius: 8px; overflow: hidden; margin: 1rem 0; }
+    table { width: 100%; border-collapse: collapse; background: var(--bg2); font-size: 0.88rem; }
+    thead tr { background: var(--bg3); }
+    th { padding: 0.65rem 0.9rem; color: var(--muted); font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.04em; font-weight: 600; text-align: left; }
+    td { padding: 0.65rem 0.9rem; border-top: 1px solid var(--border2); color: var(--text); vertical-align: top; }
+    tr:last-child td { border-bottom: none; }
+
+    /* Badges inline */
+    .badge {
+      display: inline-block; padding: 0.15rem 0.5rem;
+      border-radius: 10px; font-size: 0.75rem; font-weight: 600;
+      vertical-align: middle;
+    }
+    .badge-blue   { background: rgba(88,166,255,0.15); color: var(--blue); }
+    .badge-green  { background: rgba(63,185,80,0.15);  color: var(--green); }
+    .badge-yellow { background: rgba(227,179,65,0.15); color: var(--yellow); }
+    .badge-red    { background: rgba(248,81,73,0.15);  color: var(--red); }
+    .badge-purple { background: rgba(163,113,247,0.15);color: var(--purple); }
+    .badge-gray   { background: rgba(139,148,158,0.15);color: var(--muted); }
+
+    /* Campo de formulário visual */
+    .field-demo {
+      background: var(--bg2); border: 1px solid var(--border);
+      border-radius: 8px; padding: 1rem 1.2rem; margin: 0.8rem 0;
+    }
+    .field-demo .field-row { display: flex; flex-wrap: wrap; gap: 1rem; margin-bottom: 0.8rem; }
+    .field-demo .field-row:last-child { margin-bottom: 0; }
+    .field-item { flex: 1; min-width: 160px; }
+    .field-item label { display: block; font-size: 0.75rem; color: var(--muted); margin-bottom: 0.25rem; text-transform: uppercase; letter-spacing: 0.03em; }
+    .field-item .fval { font-size: 0.88rem; color: var(--text); }
+    .field-item .fval.req::after { content: ' *'; color: var(--red); }
+
+    /* Chip de funcionário */
+    .chip { display: inline-flex; align-items: center; gap: 0.3rem; padding: 0.2rem 0.6rem; border-radius: 12px; font-size: 0.78rem; font-weight: 500; }
+    .chip-green  { background:rgba(63,185,80,0.12);  border:1px solid rgba(63,185,80,0.3);  color:#3fb950; }
+    .chip-yellow { background:rgba(227,179,65,0.12); border:1px solid rgba(227,179,65,0.3); color:#e3b341; }
+    .chip-red    { background:rgba(248,81,73,0.12);  border:1px solid rgba(248,81,73,0.3);  color:#f85149; }
+    .chip-purple { background:rgba(163,113,247,0.12);border:1px solid rgba(163,113,247,0.3);color:#a371f7; }
+    .chip-blue   { background:rgba(88,166,255,0.12); border:1px solid rgba(88,166,255,0.3); color:#58a6ff; }
+    .chip-gray   { background:rgba(139,148,158,0.1); border:1px dashed #484f58;             color:#8b949e; }
+
+    /* Escala de exemplo visual */
+    .escala-demo { border: 1px solid var(--border); border-radius: 8px; overflow: hidden; margin: 1rem 0; }
+    .escala-dia-header { background: var(--bg3); padding: 0.5rem 0.9rem; font-size: 0.82rem; font-weight: 700; color: var(--text); }
+    .escala-turno { padding: 0.6rem 0.9rem; border-top: 1px solid var(--border2); font-size: 0.82rem; }
+    .escala-turno .t-label { font-size: 0.7rem; font-weight: 700; text-transform: uppercase; color: var(--muted); margin-bottom: 0.4rem; }
+    .escala-linha { display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.3rem; flex-wrap: wrap; }
+    .escala-cargo { color: var(--muted); font-size: 0.8rem; min-width: 140px; }
+
+    /* Fluxo visual */
+    .flow { display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap; margin: 1rem 0; }
+    .flow-box {
+      background: var(--bg2); border: 1px solid var(--border);
+      border-radius: 6px; padding: 0.4rem 0.8rem;
+      font-size: 0.82rem; color: var(--text);
+    }
+    .flow-arrow { color: var(--muted); font-size: 1rem; }
+
+    /* Glossário */
+    .glossary dt { font-weight: 600; color: var(--blue); margin-top: 0.8rem; }
+    .glossary dd { color: var(--muted); font-size: 0.88rem; margin-left: 1rem; }
+
+    /* Rodapé */
+    footer { margin-top: 3rem; padding-top: 1.5rem; border-top: 1px solid var(--border); text-align: center; font-size: 0.8rem; color: var(--faint); line-height: 2; }
+
+    /* Responsivo */
+    @media (max-width: 768px) {
+      #sidebar { display: none; }
+      #main { margin-left: 0; padding: 1.5rem 1rem 3rem; }
+    }
+    @media print {
+      #sidebar { display: none; }
+      #main { margin-left: 0; }
+      body { background: #fff; color: #000; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ── Sidebar ── -->
+<aside id="sidebar">
+  <div class="brand">
+    <img src="/static/logo.png" alt="RJSS" onerror="this.style.display='none'" />
+    <span>RJSS<br>Sistemas Integrados</span>
+  </div>
+  <nav>
+    <div class="nav-section">Introdução</div>
+    <a href="#visao-geral">🏠 Visão Geral</a>
+    <a href="#acesso">🔑 Acesso ao Sistema</a>
+
+    <div class="nav-section">Cadastros</div>
+    <a href="#funcionarios">👤 Funcionários</a>
+    <a href="#campos-funcionario">📝 Campos do Cadastro</a>
+    <a href="#atestados">🏥 Atestados e Férias</a>
+
+    <div class="nav-section">Escalas</div>
+    <a href="#configurar">⚙️ Configurar Turnos e Caixas</a>
+    <a href="#gerar">📅 Gerar Escala Automática</a>
+    <a href="#feriados">🎉 Feriados</a>
+    <a href="#visualizar">👁️ Visualizar Escala</a>
+    <a href="#manual">✏️ Editar / Adicionar Manual</a>
+    <a href="#rodizio">🔄 Rodízio de Caixas</a>
+
+    <div class="nav-section">Referência</div>
+    <a href="#chips">🏷️ Legenda das Cores</a>
+    <a href="#glossario">📖 Glossário</a>
+    <a href="#dicas">💡 Dicas e Boas Práticas</a>
+  </nav>
+</aside>
+
+<!-- ── Conteúdo ── -->
+<main id="main">
+
+  <!-- Hero -->
+  <div class="hero">
+    <img src="https://static.moxtcontent.com/public/resource/image/c26ef7ce-d256-4fb9-a9f1-0365f98be950.jpeg" alt="RJSS" />
+    <div>
+      <h1>Manual do Usuário</h1>
+      <p>RJSS Sistemas Integrados — Gestão de Escalas de Funcionários<br>
+      Tudo que você precisa para cadastrar, configurar e gerar escalas sem complicação.</p>
+    </div>
+  </div>
+
+
+  <!-- ═══════════════════════════════════════════ -->
+  <section id="visao-geral">
+    <h2>🏠 Visão Geral</h2>
+    <p>O RJSS é um sistema web de gestão de escalas pensado para o varejo. Ele automatiza a distribuição de funcionários por turno e caixa, respeitando folgas, férias, atestados e feriados.</p>
+
+    <h3>O que o sistema faz</h3>
+    <div class="steps">
+      <div class="step">
+        <div class="step-num">1</div>
+        <div class="step-body">
+          <strong>Cadastra funcionários</strong>
+          <p>Nome, cargo, turno, folga semanal, rotação de domingos, férias e muito mais.</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">2</div>
+        <div class="step-body">
+          <strong>Gera escalas automaticamente</strong>
+          <p>Com um clique, distribui quem trabalha em cada turno de cada dia, buscando substitutos quando necessário.</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">3</div>
+        <div class="step-body">
+          <strong>Rotaciona operadores nos caixas</strong>
+          <p>Evita que o mesmo operador fique sempre no mesmo caixa, usando histórico para garantir rodízio justo.</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">4</div>
+        <div class="step-body">
+          <strong>Permite impressão</strong>
+          <p>Cada escala gerada pode ser impressa diretamente pelo navegador.</p>
+        </div>
+      </div>
+    </div>
+
+    <h3>Fluxo de uso típico</h3>
+    <div class="flow">
+      <div class="flow-box">⚙️ Configurar turnos e caixas</div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-box">👤 Cadastrar funcionários</div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-box">📅 Gerar escala</div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-box">👁️ Visualizar / Imprimir</div>
+    </div>
+  </section>
+
+
+  <!-- ═══════════════════════════════════════════ -->
+  <section id="acesso">
+    <h2>🔑 Acesso ao Sistema</h2>
+
+    <h3>Fazendo login</h3>
+    <p>Acesse o endereço fornecido pelo administrador. Na tela de login, informe seu <strong>usuário</strong> e <strong>senha</strong> e clique em <em>Entrar</em>.</p>
+
+    <div class="callout info">
+      <div class="callout-icon">ℹ️</div>
+      <div>Se você não tiver uma conta, peça ao administrador do sistema para criar uma em <strong>Painel Admin → Adicionar usuário</strong>.</div>
+    </div>
+
+    <h3>Painel principal</h3>
+    <p>Após o login, você verá três atalhos:</p>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Atalho</th><th>O que faz</th></tr></thead>
+        <tbody>
+          <tr><td>👤 <strong>Funcionários</strong></td><td>Cadastrar e gerenciar todos os funcionários.</td></tr>
+          <tr><td>📋 <strong>Escalas</strong></td><td>Ver, imprimir ou excluir escalas já geradas.</td></tr>
+          <tr><td>⚙️ <strong>Gerar Escalas</strong></td><td>Configurar turnos/caixas e gerar novas escalas.</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+
+  <!-- ═══════════════════════════════════════════ -->
+  <section id="funcionarios">
+    <h2>👤 Funcionários</h2>
+    <p>Todo funcionário precisa estar cadastrado antes de aparecer numa escala. Acesse <strong>Funcionários → Novo funcionário</strong>.</p>
+
+    <h3>Situação na lista</h3>
+    <p>Na lista de funcionários, cada pessoa aparece com um indicador de situação:</p>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Indicador</th><th>Significado</th></tr></thead>
+        <tbody>
+          <tr><td><span class="badge badge-green">Ativo</span></td><td>Disponível para ser escalado normalmente.</td></tr>
+          <tr><td><span class="badge badge-yellow">Férias</span></td><td>Está em período de férias configurado — não será escalado.</td></tr>
+          <tr><td><span class="badge badge-red">Atestado</span></td><td>Está de atestado médico — não será escalado.</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+
+  <!-- ═══════════════════════════════════════════ -->
+  <section id="campos-funcionario">
+    <h2>📝 Campos do Cadastro de Funcionário</h2>
+
+    <h3>Dados básicos</h3>
+    <div class="field-demo">
+      <div class="field-row">
+        <div class="field-item"><label>Nome completo</label><div class="fval req">Ex: Ana Beatriz Farias</div></div>
+        <div class="field-item"><label>Data de admissão</label><div class="fval req">Ex: 2018-03-15</div></div>
+      </div>
+      <div class="field-row">
+        <div class="field-item"><label>Cargo principal</label><div class="fval req">Operador de Caixa / Supervisor / Embalador / Guarda-Volumes</div></div>
+        <div class="field-item"><label>Cargo secundário</label><div class="fval">Usado como substituto quando faltar titular</div></div>
+      </div>
+      <div class="field-row">
+        <div class="field-item"><label>Turno</label><div class="fval req">Manhã (06h–14h) ou Tarde (14h–22h)</div></div>
+      </div>
+    </div>
+
+    <div class="callout tip">
+      <div class="callout-icon">💡</div>
+      <div>A <strong>data de admissão</strong> define prioridade: funcionários mais antigos são escalados primeiro quando há mais de um titular disponível.</div>
+    </div>
+
+    <h3>Folgas e domingos</h3>
+    <div class="field-demo">
+      <div class="field-row">
+        <div class="field-item">
+          <label>Folga semanal fixa</label>
+          <div class="fval">Segunda / Terça / Quarta... O dia em que a pessoa NUNCA trabalha.</div>
+        </div>
+        <div class="field-item">
+          <label>Folga em feriados</label>
+          <div class="fval">Se marcado, não aparece na seleção de feriados.</div>
+        </div>
+      </div>
+      <div class="field-row">
+        <div class="field-item">
+          <label>Domingos de folga por ciclo</label>
+          <div class="fval">Quantos domingos seguidos descansa. Ex: 1</div>
+        </div>
+        <div class="field-item">
+          <label>Domingos trabalhados por ciclo</label>
+          <div class="fval">Quantos domingos seguidos trabalha antes da folga. Ex: 2</div>
+        </div>
+      </div>
+      <div class="field-row">
+        <div class="field-item">
+          <label>Data de referência (domingo)</label>
+          <div class="fval">Último domingo de folga que ocorreu — o sistema calcula o próximo a partir daí.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="callout info">
+      <div class="callout-icon">ℹ️</div>
+      <div><strong>Exemplo de rotação:</strong> com <em>1 domingo de folga</em> e <em>2 domingos trabalhados</em>, o funcionário folga 1 domingo, trabalha 2, folga 1, trabalha 2... e assim por diante. Defina a data de referência como o último domingo que ele efetivamente folga ou folgou.</div>
+    </div>
+
+    <h3>Preferências de caixa (operadores)</h3>
+    <div class="field-demo">
+      <div class="field-row">
+        <div class="field-item">
+          <label>Velocidade</label>
+          <div class="fval">Normal ou Rápido. Operadores rápidos são priorizados em caixas do tipo "Rápido".</div>
+        </div>
+        <div class="field-item">
+          <label>Caixa fixo</label>
+          <div class="fval">Se preenchido, o operador é SEMPRE alocado neste caixa (quando ele estiver aberto no turno).</div>
+        </div>
+      </div>
+      <div class="field-row">
+        <div class="field-item">
+          <label>Caixas preferidos</label>
+          <div class="fval">Lista de caixas onde este operador performa melhor. Dá um bônus no algoritmo de rodízio.</div>
+        </div>
+      </div>
+    </div>
+
+    <h3>Observações e restrições</h3>
+    <div class="field-demo">
+      <div class="field-row">
+        <div class="field-item"><label>Restrições</label><div class="fval">Ex: gestante, limitação física, laudo médico.</div></div>
+        <div class="field-item"><label>Avaliações</label><div class="fval">Histórico de desempenho ou notas do gestor.</div></div>
+      </div>
+      <div class="field-row">
+        <div class="field-item"><label>Observações gerais</label><div class="fval">Qualquer informação relevante sobre o funcionário.</div></div>
+      </div>
+    </div>
+  </section>
+
+
+  <!-- ═══════════════════════════════════════════ -->
+  <section id="atestados">
+    <h2>🏥 Atestados e Férias</h2>
+
+    <h3>Registrar férias</h3>
+    <p>No cadastro do funcionário, preencha os campos <strong>Início das férias</strong> e <strong>Fim das férias</strong>. Enquanto estiver neste período, o funcionário não será escalado.</p>
+
+    <h3>Registrar atestado médico</h3>
+    <p>Abra a página de detalhes do funcionário (clique em <em>Ver</em> na lista) e use a seção <strong>Registrar Atestado</strong> no final da página. Informe a data de início, a data de fim e uma observação opcional.</p>
+
+    <div class="callout warning">
+      <div class="callout-icon">⚠️</div>
+      <div>Um funcionário pode ter vários atestados. Cada um tem início e fim independentes. Para remover um atestado, edite o funcionário e limpe as datas correspondentes.</div>
+    </div>
+  </section>
+
+
+  <!-- ═══════════════════════════════════════════ -->
+  <section id="configurar">
+    <h2>⚙️ Configurar Turnos e Caixas</h2>
+    <p>Acesse <strong>Gerar Escalas → Configurações</strong>. Esta é uma etapa fundamental — sem ela, o sistema não sabe quantos funcionários por cargo precisam estar em cada turno.</p>
+
+    <h3>Configuração de turnos</h3>
+    <div class="field-demo">
+      <div class="field-row">
+        <div class="field-item"><label>Horário de início e fim</label><div class="fval">Ex: 06:00 — 14:00 (manhã)</div></div>
+        <div class="field-item"><label>Período de geração (dias)</label><div class="fval">Quantos dias a escala vai cobrir. Padrão: 7</div></div>
+      </div>
+      <div class="field-row">
+        <div class="field-item"><label>Supervisores</label><div class="fval">Quantidade necessária por turno. Ex: 1</div></div>
+        <div class="field-item"><label>Operadores de caixa</label><div class="fval">Ex: 3</div></div>
+      </div>
+      <div class="field-row">
+        <div class="field-item"><label>Embaladores</label><div class="fval">Ex: 1</div></div>
+        <div class="field-item"><label>Guarda-volumes</label><div class="fval">Ex: 1</div></div>
+      </div>
+    </div>
+
+    <h3>Cadastro de caixas</h3>
+    <p>Para cada caixa do seu estabelecimento, adicione um registro com:</p>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Campo</th><th>O que preencher</th></tr></thead>
+        <tbody>
+          <tr><td><strong>Número</strong></td><td>Identificação visual: 01, 02, 03...</td></tr>
+          <tr>
+            <td><strong>Tipo</strong></td>
+            <td>
+              <span class="badge badge-blue">Preferencial</span> Para idosos, gestantes e PcD.<br>
+              <span class="badge badge-green">Normal</span> Atendimento geral.<br>
+              <span class="badge badge-yellow">Rápido</span> Poucos itens — operadores rápidos são priorizados aqui.
+            </td>
+          </tr>
+          <tr><td><strong>Status por turno</strong></td><td>Aberto ou Fechado para manhã e tarde independentemente. Caixas fechados são ignorados na geração.</td></tr>
+          <tr><td><strong>Restrições ergonômicas</strong></td><td>Opcional. Ex: "apenas sentado", "balcão alto". Informativo.</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="callout tip">
+      <div class="callout-icon">💡</div>
+      <div>Se não cadastrar nenhum caixa, o sistema gera caixas virtuais automaticamente (Cx 01, Cx 02...) para que o rodízio funcione mesmo assim. Mas para fechar caixa por turno ou travar funcionário num caixa específico, é necessário cadastrar os caixas reais.</div>
+    </div>
+
+    <h3>Feriados locais</h3>
+    <p>Na mesma tela de configurações, role até a seção <strong>Feriados locais</strong> para cadastrar feriados municipais ou estaduais que o sistema não reconhece automaticamente. Veja a seção <a href="#feriados" style="color:var(--blue);">🎉 Feriados</a> para mais detalhes.</p>
+  </section>
+
+
+  <!-- ═══════════════════════════════════════════ -->
+  <section id="gerar">
+    <h2>📅 Gerar Escala Automática</h2>
+
+    <h3>Passo a passo</h3>
+    <div class="steps">
+      <div class="step">
+        <div class="step-num">1</div>
+        <div class="step-body">
+          <strong>Acesse Gerar Escalas</strong>
+          <p>Clique no atalho no painel principal ou no menu.</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">2</div>
+        <div class="step-body">
+          <strong>Informe a data de início</strong>
+          <p>O sistema gerará tantos dias quantos configurado em "Período de geração" (padrão: 7 dias).</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">3</div>
+        <div class="step-body">
+          <strong>Confirme feriados (se houver)</strong>
+          <p>Se o período contiver feriados nacionais, o sistema mostrará uma tela para você escolher quais funcionários trabalham em cada feriado.</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">4</div>
+        <div class="step-body">
+          <strong>Veja o resultado</strong>
+          <p>A escala é gerada e exibida. Se houver vagas (sem cobertura disponível), um alerta amarelo aparecerá no topo.</p>
+        </div>
+      </div>
+    </div>
+
+    <h3>O que o sistema faz automaticamente</h3>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Situação</th><th>Comportamento</th></tr></thead>
+        <tbody>
+          <tr><td>Funcionário de férias ou atestado</td><td>Ignorado automaticamente no período.</td></tr>
+          <tr><td>Folga semanal fixa</td><td>Nunca escalado no dia configurado.</td></tr>
+          <tr><td>Rotação de domingos</td><td>O sistema calcula, com base na data de referência, se aquele domingo é de folga ou trabalho.</td></tr>
+          <tr><td>Falta de titular no turno</td><td>Busca quem tem aquele cargo como secundário. Se não houver, traz alguém do outro turno (intermediário).</td></tr>
+          <tr><td>Caixa fechado no turno</td><td>Ignorado — operadores não são alocados ali.</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3>Escalas consecutivas</h3>
+    <p>Se você gerar a escala da semana 1 (dias 1–7) e depois gerar a semana 2 (dias 8–14), a segunda respeita o histórico de caixas da primeira — o rodízio continua de onde parou.</p>
+
+    <div class="callout info">
+      <div class="callout-icon">ℹ️</div>
+      <div>Se você gerar uma nova escala cobrindo dias que já existem em outra escala salva, os dias repetidos são <strong>copiados exatamente</strong> da escala anterior, sem recalcular. Isso garante consistência. Para recalcular um dia, exclua a escala original antes.</div>
+    </div>
+  </section>
+
+
+  <!-- ═══════════════════════════════════════════ -->
+  <section id="feriados">
+    <h2>🎉 Feriados</h2>
+    <p>O sistema reconhece automaticamente os feriados nacionais brasileiros dentro do período solicitado.</p>
+
+    <h3>Feriados reconhecidos</h3>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Data</th><th>Feriado</th></tr></thead>
+        <tbody>
+          <tr><td>01/01</td><td>Ano Novo</td></tr>
+          <tr><td>21/04</td><td>Tiradentes</td></tr>
+          <tr><td>01/05</td><td>Dia do Trabalho</td></tr>
+          <tr><td>07/09</td><td>Independência do Brasil</td></tr>
+          <tr><td>12/10</td><td>Nossa Senhora Aparecida</td></tr>
+          <tr><td>02/11</td><td>Finados</td></tr>
+          <tr><td>15/11</td><td>Proclamação da República</td></tr>
+          <tr><td>25/12</td><td>Natal</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3>Como funciona na tela</h3>
+    <p>Quando o período de geração contém um feriado, o sistema para e exibe uma tela com a lista de funcionários disponíveis para aquele dia. Você marca com checkbox quem confirmou presença e clica em <em>Continuar</em>.</p>
+
+    <div class="callout warning">
+      <div class="callout-icon">⚠️</div>
+      <div>Funcionários com <strong>"Folga em feriados"</strong> marcado no cadastro não aparecem nessa lista — eles nunca são escalados em feriados.</div>
+    </div>
+
+    <h3>Feriados locais (municipais / estaduais)</h3>
+    <p>Além dos feriados nacionais, você pode cadastrar feriados específicos do seu município ou estado. Acesse <strong>Gerar Escalas → Configurações → Feriados locais</strong>.</p>
+    <div class="steps">
+      <div class="step">
+        <div class="step-num">1</div>
+        <div class="step-body">
+          <strong>Clique em "+ Adicionar feriado"</strong>
+          <p>Uma nova linha aparece com campos de data e nome.</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">2</div>
+        <div class="step-body">
+          <strong>Preencha a data e o nome</strong>
+          <p>Ex: data <em>15/11</em> já é nacional, mas um feriado municipal como <em>Fundação da Cidade</em> em <em>12/06</em> deve ser cadastrado aqui.</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">3</div>
+        <div class="step-body">
+          <strong>Salve as configurações</strong>
+          <p>A partir da próxima geração de escala, esses dias serão tratados como feriados — o sistema perguntará quais funcionários trabalharão neles.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="callout info">
+      <div class="callout-icon">ℹ️</div>
+      <div>Feriados locais funcionam exatamente como os nacionais. O nome que você cadastrar aparecerá na tela de confirmação de feriados para facilitar a identificação.</div>
+    </div>
+  </section>
+
+
+  <!-- ═══════════════════════════════════════════ -->
+  <section id="visualizar">
+    <h2>👁️ Visualizar e Imprimir Escala</h2>
+
+    <h3>Navegando pela escala</h3>
+    <p>Acesse <strong>Escalas</strong> e clique em <em>Ver</em> na escala desejada. A visualização mostra todos os dias do período, divididos por turno e cargo.</p>
+
+    <h3>Exemplo de como aparece</h3>
+    <div class="escala-demo">
+      <div class="escala-dia-header">📅 2026-05-11 — Segunda</div>
+      <div class="escala-turno">
+        <div class="t-label">Manhã · 06:00 - 14:00</div>
+        <div class="escala-linha">
+          <span class="escala-cargo">Supervisor</span>
+          <span class="chip chip-green">Ricardo Menezes</span>
+        </div>
+        <div class="escala-linha">
+          <span class="escala-cargo">Operador de Caixa</span>
+          <span class="chip chip-green">Sandra Helena — Cx 02</span>
+          <span class="chip chip-green">Marcos Vinícius — Cx 01</span>
+          <span class="chip chip-yellow">⚠ Letícia Colin — Cx 03</span>
+        </div>
+        <div class="escala-linha">
+          <span class="escala-cargo">Embalador</span>
+          <span class="chip chip-green">Paulo Rodrigues</span>
+        </div>
+      </div>
+    </div>
+
+    <p>O número do caixa aparece depois do nome do operador (ex: <em>— Cx 02</em>).</p>
+
+    <h3>Imprimir</h3>
+    <p>Clique em <strong>🖨 Imprimir</strong> no canto superior da escala. O navegador abrirá a janela de impressão com uma versão limpa da escala, sem menus e botões.</p>
+  </section>
+
+
+  <!-- ═══════════════════════════════════════════ -->
+  <section id="manual">
+    <h2>✏️ Editar / Adicionar Escala Manual</h2>
+    <p>Precisa registrar ou corrigir a escala de um dia inteiro? Acesse <strong>Escalas → Adicionar escala</strong>. Esta tela permite montar ou editar o dia completo — todos os funcionários de todos os turnos ao mesmo tempo.</p>
+
+    <h3>Carregar um dia existente</h3>
+    <p>Se o dia já possuir uma escala salva, você pode carregá-la para edição:</p>
+    <div class="steps">
+      <div class="step">
+        <div class="step-num">1</div>
+        <div class="step-body">
+          <strong>Selecione a data</strong>
+          <p>Use o campo de data no topo da página para escolher o dia.</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">2</div>
+        <div class="step-body">
+          <strong>Clique em "Carregar dia"</strong>
+          <p>O sistema busca a escala existente e preenche automaticamente todas as linhas com os funcionários já alocados.</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">3</div>
+        <div class="step-body">
+          <strong>Edite à vontade</strong>
+          <p>Adicione, remova ou altere linhas conforme necessário. Ao salvar, o dia será <strong>substituído inteiramente</strong> pelo novo conteúdo.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="callout info">
+      <div class="callout-icon">ℹ️</div>
+      <div>Se a data não tiver escala, o sistema informa <em>"Criando do zero"</em> e você começa com uma tela em branco.</div>
+    </div>
+
+    <h3>Adicionando funcionários ao dia</h3>
+    <p>Cada linha da tela representa um funcionário no dia. Para cada linha, preencha:</p>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Campo</th><th>O que preencher</th></tr></thead>
+        <tbody>
+          <tr>
+            <td><strong>Turno</strong></td>
+            <td>Manhã ou Tarde.</td>
+          </tr>
+          <tr>
+            <td><strong>Funcionário</strong></td>
+            <td>Digite o nome no campo de autocompletar e <strong>selecione da lista</strong>. Obrigatório selecionar — não basta digitar.</td>
+          </tr>
+          <tr>
+            <td><strong>Local / Função</strong></td>
+            <td>Comece a digitar para ver sugestões: "Caixa 01", "Supervisor", "Embalador", "Guarda-Volumes". Pode digitar livremente também.</td>
+          </tr>
+          <tr>
+            <td><strong>Destino especial</strong></td>
+            <td>Opcional. Use quando o funcionário estará em outro setor no dia. Ex: <em>"Financeiro"</em>, <em>"Depósito"</em>. Aparece na escala como <em>→ Financeiro</em>.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <p>Use o botão <strong>+ Adicionar funcionário</strong> para incluir novas linhas e o botão <strong>✕</strong> para remover.</p>
+
+    <div class="callout tip">
+      <div class="callout-icon">💡</div>
+      <div>Use o campo <strong>Destino especial</strong> para registrar, por exemplo, que a "Tais" irá ao Financeiro na segunda-feira — a informação aparece visível na escala impressa.</div>
+    </div>
+
+    <p>As alocações manuais aparecem na visualização com o chip <span class="chip chip-blue">Azul</span>, diferente das geradas automaticamente.</p>
+  </section>
+
+
+  <!-- ═══════════════════════════════════════════ -->
+  <section id="rodizio">
+    <h2>🔄 Rodízio de Caixas</h2>
+    <p>Este é o coração do sistema. O objetivo é que nenhum operador fique preso no mesmo caixa dia após dia.</p>
+
+    <h3>Como funciona</h3>
+    <p>A cada geração, o sistema consulta o histórico de caixas de cada operador (últimas 30 alocações). Para cada caixa a preencher, ele escolhe o operador que está <strong>há mais tempo sem operar aquele caixa específico</strong>.</p>
+
+    <p>A decisão é global — não caixa a caixa. O algoritmo encontra a combinação de operador + caixa que minimiza o custo total de repetição para todos ao mesmo tempo.</p>
+
+    <h3>Fatores que influenciam a alocação</h3>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Regra</th><th>Efeito</th></tr></thead>
+        <tbody>
+          <tr><td>Mais tempo sem usar o caixa</td><td>Maior prioridade — é o critério principal.</td></tr>
+          <tr><td>Caixa preferido do operador</td><td>Bônus — aumenta a chance de ser alocado ali.</td></tr>
+          <tr><td>Operador rápido + caixa rápido</td><td>Bônus — o sistema prefere essa combinação.</td></tr>
+          <tr><td>Operador rápido + caixa preferencial</td><td>Penalidade — evita esta combinação (caixa preferencial pede paciência).</td></tr>
+          <tr><td>Caixa fixo</td><td>Absoluto — o operador vai SEMPRE para aquele caixa, antes de qualquer cálculo.</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="callout tip">
+      <div class="callout-icon">💡</div>
+      <div>Para o rodízio funcionar entre semanas, <strong>não exclua escalas antigas</strong> desnecessariamente — elas formam o histórico. Exclua apenas quando quiser recalcular aqueles dias do zero.</div>
+    </div>
+  </section>
+
+
+  <!-- ═══════════════════════════════════════════ -->
+  <section id="chips">
+    <h2>🏷️ Legenda das Cores</h2>
+    <p>Na visualização da escala, cada funcionário aparece num chip colorido que indica como ele foi alocado:</p>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Chip</th><th>Significado</th></tr></thead>
+        <tbody>
+          <tr>
+            <td><span class="chip chip-green">João Silva — Cx 01</span></td>
+            <td><strong>Titular</strong> — cargo principal no turno fixo.</td>
+          </tr>
+          <tr>
+            <td><span class="chip chip-yellow">⚠ Maria Souza — Cx 02</span></td>
+            <td><strong>Substituto</strong> — veio por cargo secundário ou de outro turno.</td>
+          </tr>
+          <tr>
+            <td><span class="chip chip-red">↕ Carlos Lima</span></td>
+            <td><strong>Intermediário</strong> — cobertura extra de vacância criada por substituto.</td>
+          </tr>
+          <tr>
+            <td><span class="chip chip-purple">Ana Costa — Cx 03</span></td>
+            <td><strong>Feriado</strong> — confirmado manualmente para trabalhar no feriado.</td>
+          </tr>
+          <tr>
+            <td><span class="chip chip-blue">Pedro Alves — Cx 01</span></td>
+            <td><strong>Manual</strong> — adicionado via "Adicionar escala manual".</td>
+          </tr>
+          <tr>
+            <td><span class="chip chip-gray">VAGA</span></td>
+            <td><strong>Vaga</strong> — nenhum funcionário disponível para cobrir a posição.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="callout warning">
+      <div class="callout-icon">⚠️</div>
+      <div>Vagas indicam que não havia funcionários disponíveis para aquela posição no dia. Verifique se há funcionários suficientes cadastrados no turno correspondente.</div>
+    </div>
+  </section>
+
+
+  <!-- ═══════════════════════════════════════════ -->
+  <section id="glossario">
+    <h2>📖 Glossário</h2>
+    <dl class="glossary">
+      <dt>Cargo primário</dt>
+      <dd>Função principal do funcionário. É o cargo pelo qual ele é escalado primeiro.</dd>
+
+      <dt>Cargo secundário</dt>
+      <dd>Função alternativa. O funcionário pode cobrir esta função se faltar um titular.</dd>
+
+      <dt>Titular</dt>
+      <dd>Funcionário escalado pelo cargo primário, no turno fixo dele.</dd>
+
+      <dt>Substituto</dt>
+      <dd>Funcionário escalado pelo cargo secundário ou vindo de outro turno para cobrir uma falta.</dd>
+
+      <dt>Intermediário</dt>
+      <dd>Funcionário extra trazido para cobrir a vacância criada quando um substituto deixa o próprio turno descoberto.</dd>
+
+      <dt>Vaga</dt>
+      <dd>Posição que não pôde ser preenchida — nenhum funcionário disponível.</dd>
+
+      <dt>Rotação de domingos</dt>
+      <dd>Ciclo de quantos domingos o funcionário trabalha antes de folgar. Ex: "2 trabalha, 1 folga".</dd>
+
+      <dt>Caixa fixo</dt>
+      <dd>Caixa permanente de um operador — ele sempre é alocado ali, antes do algoritmo de rodízio agir.</dd>
+
+      <dt>Histórico de caixas</dt>
+      <dd>Registro das últimas 30 alocações de caixa de cada operador, usado para calcular o rodízio.</dd>
+
+      <dt>Operador rápido</dt>
+      <dd>Operador com velocidade "Rápido" — priorizado em caixas do tipo Rápido.</dd>
+
+      <dt>Período de geração</dt>
+      <dd>Quantos dias a escala cobre. Configurado em Configurações (padrão: 7 dias).</dd>
+    </dl>
+  </section>
+
+
+  <!-- ═══════════════════════════════════════════ -->
+  <section id="dicas">
+    <h2>💡 Dicas e Boas Práticas</h2>
+
+    <h3>Antes de gerar a primeira escala</h3>
+    <div class="callout tip">
+      <div class="callout-icon">✅</div>
+      <div>
+        <strong>Checklist de configuração inicial:</strong>
+        <ol style="margin-top:0.5rem; margin-left:1.2rem; font-size:0.88rem; color:#86efac;">
+          <li>Configurar horários e quantidades de cada cargo por turno</li>
+          <li>Cadastrar todos os caixas com tipo e status por turno</li>
+          <li>Cadastrar todos os funcionários com turno, cargo e folgas</li>
+          <li>Definir a data de referência de domingo para cada funcionário</li>
+        </ol>
+      </div>
+    </div>
+
+    <h3>Dicas do dia a dia</h3>
+    <div class="steps">
+      <div class="step">
+        <div class="step-num">💡</div>
+        <div class="step-body">
+          <strong>Gere escalas consecutivas para melhor rodízio</strong>
+          <p>Gere semana 1, depois semana 2, semana 3... O histórico cresce e o rodízio fica mais preciso.</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">💡</div>
+        <div class="step-body">
+          <strong>Registre atestados antes de gerar</strong>
+          <p>Se um funcionário ficou doente, registre o atestado antes de gerar a escala do período — ele será ignorado automaticamente.</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">💡</div>
+        <div class="step-body">
+          <strong>Use "Adicionar escala" para editar ou criar um dia inteiro</strong>
+          <p>Selecione a data, clique em "Carregar dia" para trazer a escala existente, ajuste o que for necessário e salve. Não precisa regenerar a semana inteira.</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">💡</div>
+        <div class="step-body">
+          <strong>Caixa fixo vs. caixa preferido</strong>
+          <p>Use <em>caixa fixo</em> para quem NUNCA deve mudar (ex: operador com restrição física). Use <em>caixa preferido</em> para quem tem melhor performance em determinados caixas mas pode rodar.</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">💡</div>
+        <div class="step-body">
+          <strong>Vagas constantes? Verifique o cadastro</strong>
+          <p>Se aparecerem muitas vagas na escala, provavelmente faltam funcionários cadastrados no turno/cargo correspondente, ou todos estão de férias/atestado.</p>
+        </div>
+      </div>
+    </div>
+
+    <h3>Quando excluir uma escala</h3>
+    <p>Exclua uma escala quando quiser que aqueles dias sejam <strong>recalculados do zero</strong> na próxima geração. Se não excluir, os dias repetidos serão copiados exatamente como estão.</p>
+
+    <div class="callout danger">
+      <div class="callout-icon">🚨</div>
+      <div>A exclusão é irreversível. Se excluir uma escala que cobre semanas antigas, o histórico de rodízio daqueles dias é perdido.</div>
+    </div>
+  </section>
+
+  <footer>
+    =============<br>
+    RJSS Sistemas Integrados<br>
+    ronaldojuniosilvasantos@gmail.com<br>
+    =============
+  </footer>
+
+</main>
+
+<script>
+  // Marca link ativo conforme scroll
+  const links = document.querySelectorAll('#sidebar nav a');
+  const sections = document.querySelectorAll('section[id]');
+
+  const obs = new IntersectionObserver(entries => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        links.forEach(l => {
+          l.classList.toggle('active', l.getAttribute('href') === '#' + e.target.id);
+        });
+      }
+    });
+  }, { rootMargin: '-20% 0px -70% 0px' });
+
+  sections.forEach(s => obs.observe(s));
+</script>
+</body>
+</html>

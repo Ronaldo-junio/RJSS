@@ -1,0 +1,146 @@
+{% extends 'base.html' %}
+{% block titulo %}{{ func.nome }}{% endblock %}
+
+{% block nav_extra %}
+  <a href="/RJSS_Sistemas_Integrados/usuario/{{ username }}/">Início</a>
+  <a href="/RJSS_Sistemas_Integrados/usuario/{{ username }}/funcionarios/">Funcionários</a>
+{% endblock %}
+
+{% block conteudo %}
+<div class="page-header">
+  <h1>{{ func.nome }}</h1>
+  <div style="display:flex;gap:0.5rem;">
+    <a href="/RJSS_Sistemas_Integrados/usuario/{{ username }}/funcionarios/{{ func.id }}/editar/" class="btn btn-azul">Editar</a>
+    <form method="POST" action="/RJSS_Sistemas_Integrados/usuario/{{ username }}/funcionarios/{{ func.id }}/excluir/"
+          onsubmit="return confirm('Excluir este funcionário?')">
+      <button type="submit" class="btn btn-vermelho">Excluir</button>
+    </form>
+  </div>
+</div>
+
+<div style="display:grid; grid-template-columns: 1fr 1fr; gap:1rem; margin-bottom:1rem;">
+
+  <div class="card">
+    <p class="secao-titulo">Dados cadastrais</p>
+    <table style="font-size:0.88rem;">
+      <tr><td style="color:#8b949e; padding:0.4rem 0.8rem 0.4rem 0; border:none; white-space:nowrap;">Admissão</td><td style="border:none;">{{ func.data_admissao }}</td></tr>
+      <tr><td style="color:#8b949e; padding:0.4rem 0.8rem 0.4rem 0; border:none; white-space:nowrap;">Turno</td><td style="border:none;">{{ func.turno | title }}</td></tr>
+      <tr><td style="color:#8b949e; padding:0.4rem 0.8rem 0.4rem 0; border:none; white-space:nowrap;">Cargo principal</td><td style="border:none;">{{ cargos.get(func.cargo_primario, func.cargo_primario) }}</td></tr>
+      <tr><td style="color:#8b949e; padding:0.4rem 0.8rem 0.4rem 0; border:none; white-space:nowrap;">Cargo secundário</td><td style="border:none;">{{ cargos.get(func.cargo_secundario, '—') if func.cargo_secundario else '—' }}</td></tr>
+    </table>
+  </div>
+
+  <div class="card">
+    <p class="secao-titulo">Escala de folgas</p>
+    {% set rotacao = func.get('rotacao_domingo', 2) %}
+    {% set rotacao_label = {1: '1 em 1 (every other Sunday)', 2: '1 em 2 (folga a cada 2 trabalhados)', 3: '1 em 3 (folga a cada 3 trabalhados)', 4: '1 em 4 (folga a cada 4 trabalhados)'} %}
+    {% set dias_label = {'segunda':'Segunda','terca':'Terça','quarta':'Quarta','quinta':'Quinta','sexta':'Sexta','sabado':'Sábado'} %}
+
+    <table style="font-size:0.88rem;">
+      <tr>
+        <td style="color:#8b949e; padding:0.4rem 0.8rem 0.4rem 0; border:none; white-space:nowrap;">Rotação de domingo</td>
+        <td style="border:none;">{{ rotacao_label.get(rotacao, rotacao) }}</td>
+      </tr>
+      <tr>
+        <td style="color:#8b949e; padding:0.4rem 0.8rem 0.4rem 0; border:none; white-space:nowrap;">Referência (última folga)</td>
+        <td style="border:none;">{{ func.get('domingo_ref') or '—' }}</td>
+      </tr>
+      <tr>
+        <td style="color:#8b949e; padding:0.4rem 0.8rem 0.4rem 0; border:none; white-space:nowrap;">Folga semanal acompanhante</td>
+        <td style="border:none;">{{ dias_label.get(func.get('folga_semana'), '—') if func.get('folga_semana') else '—' }}</td>
+      </tr>
+      <tr>
+        <td style="color:#8b949e; padding:0.4rem 0.8rem 0.4rem 0; border:none; white-space:nowrap;">Feriados</td>
+        <td style="border:none; color:{{ '#f85149' if func.get('folga_feriado') else '#3fb950' }};">
+          {{ 'Não escalar' if func.get('folga_feriado') else 'Trabalha feriados' }}
+        </td>
+      </tr>
+    </table>
+
+    {% if func.get('ferias_inicio') and func.get('ferias_fim') %}
+      <p style="margin-top:0.8rem; font-size:0.85rem; color:#a371f7;">
+        Férias: {{ func.ferias_inicio }} até {{ func.ferias_fim }}
+      </p>
+    {% endif %}
+  </div>
+
+</div>
+
+<div style="display:grid; grid-template-columns: 1fr 1fr; gap:1rem; margin-bottom:1rem;">
+
+  {% if func.get('restricoes') %}
+  <div class="card">
+    <p class="secao-titulo">Restrições</p>
+    <p style="font-size:0.88rem; white-space:pre-line;">{{ func.restricoes }}</p>
+  </div>
+  {% endif %}
+
+  {% if func.get('avaliacoes') or func.get('recomendacoes') %}
+  <div class="card">
+    {% if func.get('avaliacoes') %}
+      <p class="secao-titulo">Avaliações</p>
+      <p style="font-size:0.88rem; white-space:pre-line; margin-bottom:0.8rem;">{{ func.avaliacoes }}</p>
+    {% endif %}
+    {% if func.get('recomendacoes') %}
+      <p class="secao-titulo">Recomendações</p>
+      <p style="font-size:0.88rem; white-space:pre-line;">{{ func.recomendacoes }}</p>
+    {% endif %}
+  </div>
+  {% endif %}
+
+</div>
+
+{% if func.get('observacoes') %}
+<div class="card" style="margin-bottom:1rem;">
+  <p class="secao-titulo">Observações gerais</p>
+  <p style="font-size:0.88rem; white-space:pre-line;">{{ func.observacoes }}</p>
+</div>
+{% endif %}
+
+<!-- Atestados -->
+<div class="card">
+  <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:1rem;">
+    <p class="secao-titulo" style="margin:0;">Atestados médicos</p>
+  </div>
+
+  {% if func.get('atestados') %}
+  <div class="tabela-wrap" style="margin-bottom:1rem;">
+    <table>
+      <thead><tr><th>Início</th><th>Fim</th><th>Observação</th></tr></thead>
+      <tbody>
+        {% for at in func.atestados %}
+        <tr>
+          <td>{{ at.inicio }}</td>
+          <td>{{ at.fim }}</td>
+          <td>{{ at.obs or '—' }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% endif %}
+
+  <details>
+    <summary style="cursor:pointer; font-size:0.85rem; color:#58a6ff; margin-bottom:0.8rem;">+ Registrar novo atestado</summary>
+    <form method="POST" action="/RJSS_Sistemas_Integrados/usuario/{{ username }}/funcionarios/{{ func.id }}/atestado/" style="margin-top:0.8rem;">
+      <div class="form-grid">
+        <div class="form-group">
+          <label>Início</label>
+          <input type="date" name="inicio" required />
+        </div>
+        <div class="form-group">
+          <label>Fim</label>
+          <input type="date" name="fim" required />
+        </div>
+        <div class="form-group full">
+          <label>Observação</label>
+          <input type="text" name="obs" placeholder="Motivo ou CID..." />
+        </div>
+      </div>
+      <div class="form-acoes" style="margin-top:0.8rem;">
+        <button type="submit" class="btn btn-laranja">Registrar atestado</button>
+      </div>
+    </form>
+  </details>
+</div>
+{% endblock %}

@@ -1,0 +1,50 @@
+{% extends 'base.html' %}
+{% block titulo %}Escalas{% endblock %}
+
+{% block nav_extra %}
+  <a href="/RJSS_Sistemas_Integrados/usuario/{{ username }}/">Início</a>
+  <a href="/RJSS_Sistemas_Integrados/usuario/{{ username }}/gerar-escalas/">Gerar Escalas</a>
+{% endblock %}
+
+{% block conteudo %}
+<div class="page-header">
+  <h1>Escalas geradas</h1>
+  <div style="display:flex; gap:0.5rem;">
+    <a href="/RJSS_Sistemas_Integrados/usuario/{{ username }}/escalas/adicionar/" class="btn btn-azul">+ Adicionar escala</a>
+    <a href="/RJSS_Sistemas_Integrados/usuario/{{ username }}/gerar-escalas/" class="btn btn-verde">+ Gerar nova escala</a>
+  </div>
+</div>
+
+{% if escalas %}
+<div style="display:flex; flex-direction:column; gap:0.8rem;">
+  {% for e in escalas %}
+  <div class="card" style="display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:1rem;">
+    <div>
+      <div style="font-weight:700; font-size:1rem; color:#e6edf3; margin-bottom:0.2rem;">
+        {{ e.data_inicio }} até {{ e.data_fim }}
+      </div>
+      {% if e.alertas %}
+        <div style="font-size:0.8rem; color:#e3b341;">⚠ {{ e.alertas | length }} alerta(s)</div>
+      {% else %}
+        <div style="font-size:0.8rem; color:#3fb950;">✓ Sem vagas</div>
+      {% endif %}
+    </div>
+    <div style="display:flex; gap:0.5rem;">
+      <a href="/RJSS_Sistemas_Integrados/usuario/{{ username }}/escalas/{{ e.id }}/" class="btn btn-azul">Ver</a>
+      <a href="/RJSS_Sistemas_Integrados/usuario/{{ username }}/escalas/{{ e.id }}/imprimir/" class="btn btn-cinza" target="_blank">Imprimir</a>
+      <form method="POST" action="/RJSS_Sistemas_Integrados/usuario/{{ username }}/escalas/{{ e.id }}/excluir/"
+            onsubmit="return confirm('Excluir esta escala?')">
+        <button type="submit" class="btn btn-vermelho">Excluir</button>
+      </form>
+    </div>
+  </div>
+  {% endfor %}
+</div>
+{% else %}
+<div class="card" style="text-align:center; padding:3rem; color:#8b949e;">
+  <div style="font-size:2.5rem; margin-bottom:1rem;">📋</div>
+  <p>Nenhuma escala gerada ainda.</p>
+  <a href="/RJSS_Sistemas_Integrados/usuario/{{ username }}/gerar-escalas/" class="btn btn-verde" style="margin-top:1rem;">Gerar primeira escala</a>
+</div>
+{% endif %}
+{% endblock %}

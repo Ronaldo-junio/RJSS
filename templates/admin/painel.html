@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Painel Admin — RJSS Sistemas Integrados</title>
+  <link rel="icon" type="image/png" href="/static/logo.png" />
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      background-color: #0d1117;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      color: #e6edf3;
+    }
+
+    header {
+      background: #161b22;
+      border-bottom: 1px solid #30363d;
+      padding: 1rem 2rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    header .titulo {
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: #58a6ff;
+    }
+
+    header .info {
+      font-size: 0.85rem;
+      color: #8b949e;
+    }
+
+    header a.sair {
+      font-size: 0.85rem;
+      color: #f85149;
+      text-decoration: none;
+      margin-left: 1.5rem;
+    }
+
+    header a.sair:hover { text-decoration: underline; }
+
+    .conteudo {
+      flex: 1;
+      padding: 2rem;
+      max-width: 900px;
+      margin: 0 auto;
+      width: 100%;
+    }
+
+    .topo-acao {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 1.5rem;
+    }
+
+    h2 {
+      font-size: 1.3rem;
+      color: #e6edf3;
+    }
+
+    .btn {
+      padding: 0.5rem 1.1rem;
+      border: none;
+      border-radius: 6px;
+      font-size: 0.9rem;
+      font-weight: 600;
+      cursor: pointer;
+      text-decoration: none;
+      display: inline-block;
+      transition: background 0.2s;
+    }
+
+    .btn-verde { background: #238636; color: #fff; }
+    .btn-verde:hover { background: #2ea043; }
+    .btn-vermelho { background: #b62324; color: #fff; }
+    .btn-vermelho:hover { background: #d1242f; }
+    .btn-azul { background: #1f6feb; color: #fff; }
+    .btn-azul:hover { background: #388bfd; }
+    .btn-laranja { background: #9e6a03; color: #fff; }
+    .btn-laranja:hover { background: #b87c04; }
+
+    .alerta {
+      border-radius: 6px;
+      padding: 0.6rem 1rem;
+      font-size: 0.85rem;
+      margin-bottom: 1.2rem;
+    }
+
+    .alerta.erro { background: rgba(248, 81, 73, 0.15); border: 1px solid #f85149; color: #f85149; }
+    .alerta.sucesso { background: rgba(35, 134, 54, 0.15); border: 1px solid #238636; color: #3fb950; }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      background: #161b22;
+      border: 1px solid #30363d;
+      border-radius: 8px;
+      overflow: hidden;
+    }
+
+    thead tr {
+      background: #21262d;
+    }
+
+    th, td {
+      padding: 0.85rem 1.2rem;
+      text-align: left;
+      font-size: 0.9rem;
+      border-bottom: 1px solid #21262d;
+    }
+
+    th { color: #8b949e; font-weight: 600; }
+    td { color: #e6edf3; }
+
+    tr:last-child td { border-bottom: none; }
+
+    .badge {
+      display: inline-block;
+      padding: 0.2rem 0.6rem;
+      border-radius: 12px;
+      font-size: 0.75rem;
+      font-weight: 600;
+    }
+
+    .badge-admin { background: rgba(88, 166, 255, 0.15); color: #58a6ff; }
+    .badge-usuario { background: rgba(63, 185, 80, 0.15); color: #3fb950; }
+
+    .acoes { display: flex; gap: 0.5rem; }
+
+    footer {
+      text-align: center;
+      padding: 1rem;
+      font-size: 0.8rem;
+      color: #8b949e;
+      border-top: 1px solid #21262d;
+      line-height: 1.8;
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <span class="titulo">
+      <img src="/static/logo.png" alt="RJSS" style="width:26px;height:26px;vertical-align:middle;margin-right:0.4rem;" />
+      RJSS — Painel Administrador
+    </span>
+    <span>
+      <span class="info">Logado como <strong>admin</strong></span>
+      <a class="sair" href="/RJSS_Sistemas_Integrados/logout/">Sair</a>
+    </span>
+  </header>
+
+  <div class="conteudo">
+
+    {% with msgs = get_flashed_messages(with_categories=true) %}
+      {% for cat, msg in msgs %}
+        <div class="alerta {{ cat }}">{{ msg }}</div>
+      {% endfor %}
+    {% endwith %}
+
+    <div class="topo-acao">
+      <h2>Usuários cadastrados</h2>
+      <div style="display:flex; gap:0.5rem;">
+        <form method="POST" action="/RJSS_Sistemas_Integrados/admin/reiniciar/"
+              onsubmit="return confirm('Reiniciar o servidor agora?')">
+          <button type="submit" class="btn btn-laranja">↺ Reiniciar servidor</button>
+        </form>
+        <a href="/RJSS_Sistemas_Integrados/admin/adicionar/" class="btn btn-verde">+ Adicionar usuário</a>
+      </div>
+    </div>
+
+    <table>
+      <thead>
+        <tr>
+          <th>Usuário</th>
+          <th>Perfil</th>
+          <th>Ações</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for nome, dados in users.items() %}
+        <tr>
+          <td>{{ nome }}</td>
+          <td>
+            <span class="badge badge-{{ dados.papel }}">{{ dados.papel }}</span>
+          </td>
+          <td>
+            <div class="acoes">
+              <a href="/RJSS_Sistemas_Integrados/usuario/{{ nome }}/" class="btn btn-azul">Acessar</a>
+              {% if nome != 'admin' %}
+              <form method="POST" action="/RJSS_Sistemas_Integrados/admin/excluir/{{ nome }}"
+                    onsubmit="return confirm('Tem certeza que deseja excluir o usuário {{ nome }}?')">
+                <button type="submit" class="btn btn-vermelho">Excluir</button>
+              </form>
+              {% endif %}
+            </div>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+
+  </div>
+
+  <footer>
+    =============<br>
+    RJSS-Sistemas Integrados<br>
+    ronaldojuniosilvasantos@gmail.com<br>
+    =============
+  </footer>
+
+</body>
+</html>

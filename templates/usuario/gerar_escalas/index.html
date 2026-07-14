@@ -1,0 +1,56 @@
+{% extends 'base.html' %}
+{% block titulo %}Gerar Escalas{% endblock %}
+
+{% block nav_extra %}
+  <a href="/RJSS_Sistemas_Integrados/usuario/{{ username }}/">Início</a>
+  <a href="/RJSS_Sistemas_Integrados/usuario/{{ username }}/escalas/">Escalas</a>
+{% endblock %}
+
+{% block conteudo %}
+<div class="page-header">
+  <h1>Gerar Escalas</h1>
+  <a href="/RJSS_Sistemas_Integrados/usuario/{{ username }}/gerar-escalas/configuracoes/" class="btn btn-cinza">⚙ Configurações do setor</a>
+</div>
+
+<div style="display:grid; grid-template-columns: 1fr 1fr; gap:1rem; align-items:start;">
+
+  <div class="card">
+    <p class="secao-titulo">Nova escala — Linha de Frente</p>
+    <form method="POST" action="/RJSS_Sistemas_Integrados/usuario/{{ username }}/gerar-escalas/gerar/">
+      <div class="form-group" style="margin-bottom:1.2rem;">
+        <label>Data de início da escala</label>
+        <input type="date" name="data_inicio" required />
+      </div>
+      <p style="font-size:0.82rem; color:#8b949e; margin-bottom:1.2rem;">
+        Período de geração: <strong style="color:#e6edf3;">{{ config.periodo_geracao_dias }} dias</strong>
+        — altere em <a href="/RJSS_Sistemas_Integrados/usuario/{{ username }}/gerar-escalas/configuracoes/" style="color:#58a6ff;">configurações</a>.
+      </p>
+      <p style="font-size:0.82rem; color:#8b949e; margin-bottom:1.5rem;">
+        Turnos fixos:
+        <strong style="color:{{ '#3fb950' if config.turnos_fixos else '#f85149' }};">
+          {{ 'Ativados' if config.turnos_fixos else 'Desativados' }}
+        </strong>
+      </p>
+      <button type="submit" class="btn btn-verde" style="width:100%;">Gerar escala</button>
+    </form>
+  </div>
+
+  <div class="card">
+    <p class="secao-titulo">Resumo das configurações atuais</p>
+    {% for turno_nome, turno in config.turnos.items() %}
+    <div style="margin-bottom:1rem;">
+      <p style="font-weight:700; color:#e6edf3; margin-bottom:0.5rem; text-transform:capitalize;">
+        Turno {{ turno_nome }} — {{ turno.horario_inicio }} às {{ turno.horario_fim }}
+      </p>
+      <div style="display:grid; grid-template-columns: 1fr 1fr; gap:0.3rem; font-size:0.85rem; color:#8b949e;">
+        <span>Supervisores: <strong style="color:#e6edf3;">{{ turno.supervisores }}</strong></span>
+        <span>Caixas: <strong style="color:#e6edf3;">{{ turno.operadores_caixa }}</strong></span>
+        <span>Embaladores: <strong style="color:#e6edf3;">{{ turno.embaladores }}</strong></span>
+        <span>Guarda-volumes: <strong style="color:#e6edf3;">{{ turno.guarda_volumes }}</strong></span>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+
+</div>
+{% endblock %}

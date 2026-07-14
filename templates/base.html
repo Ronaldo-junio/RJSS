@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>{% block titulo %}{% endblock %} — RJSS Sistemas Integrados</title>
+  <link rel="icon" type="image/png" href="/static/logo.png" />
+  <link rel="shortcut icon" type="image/png" href="/static/logo.png" />
+  <style>
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      background: #0d1117;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      color: #e6edf3;
+      font-size: 15px;
+    }
+
+    .bg-logo {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      pointer-events: none;
+      user-select: none;
+      z-index: 0;
+      opacity: 0.055;
+      width: min(44vw, 44vh);
+      height: min(44vw, 44vh);
+    }
+
+    header {
+      position: relative;
+      z-index: 10;
+      background: #161b22;
+      border-bottom: 1px solid #30363d;
+      padding: 0.8rem 1.5rem;
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    .header-titulo {
+      font-size: 1rem;
+      font-weight: 700;
+      color: #58a6ff;
+      text-decoration: none;
+      flex: 1;
+      display: flex;
+      align-items: center;
+      gap: 0.55rem;
+    }
+    .header-titulo img { width: 36px; height: 36px; flex-shrink: 0; border-radius: 8px; }
+
+    nav { display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap; }
+
+    nav a {
+      font-size: 0.82rem;
+      padding: 0.35rem 0.7rem;
+      border-radius: 6px;
+      text-decoration: none;
+      color: #8b949e;
+      transition: background 0.15s, color 0.15s;
+    }
+
+    nav a:hover { background: #21262d; color: #e6edf3; }
+    nav a.ativo { background: #21262d; color: #e6edf3; }
+    nav a.sair { color: #f85149; }
+    nav a.sair:hover { background: rgba(248,81,73,0.1); }
+
+    main {
+      flex: 1;
+      position: relative;
+      z-index: 1;
+      padding: 1.5rem;
+      max-width: 1100px;
+      margin: 0 auto;
+      width: 100%;
+    }
+
+    .page-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 1.5rem;
+      gap: 1rem;
+      flex-wrap: wrap;
+    }
+
+    .page-header h1 { font-size: 1.3rem; color: #e6edf3; }
+
+    /* Alertas */
+    .alerta {
+      border-radius: 6px;
+      padding: 0.6rem 1rem;
+      font-size: 0.85rem;
+      margin-bottom: 0.8rem;
+    }
+    .alerta.erro     { background: rgba(248,81,73,0.12); border: 1px solid #f85149; color: #f85149; }
+    .alerta.sucesso  { background: rgba(35,134,54,0.12); border: 1px solid #238636; color: #3fb950; }
+    .alerta.aviso    { background: rgba(210,153,34,0.12); border: 1px solid #d29922; color: #e3b341; }
+    .alerta.info     { background: rgba(31,111,235,0.12); border: 1px solid #1f6feb; color: #58a6ff; }
+
+    /* Botões */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      padding: 0.5rem 1rem;
+      border: none;
+      border-radius: 6px;
+      font-size: 0.88rem;
+      font-weight: 600;
+      cursor: pointer;
+      text-decoration: none;
+      transition: background 0.15s;
+      white-space: nowrap;
+    }
+    .btn-verde   { background: #238636; color: #fff; }
+    .btn-verde:hover   { background: #2ea043; }
+    .btn-azul    { background: #1f6feb; color: #fff; }
+    .btn-azul:hover    { background: #388bfd; }
+    .btn-cinza   { background: #21262d; color: #8b949e; border: 1px solid #30363d; }
+    .btn-cinza:hover   { background: #30363d; color: #e6edf3; }
+    .btn-vermelho { background: #b62324; color: #fff; }
+    .btn-vermelho:hover { background: #d1242f; }
+    .btn-laranja  { background: #9e6a03; color: #fff; }
+    .btn-laranja:hover  { background: #bb8009; }
+    .btn-sm { padding: 0.3rem 0.6rem; font-size: 0.78rem; }
+
+    /* Cards */
+    .card {
+      background: #161b22;
+      border: 1px solid #30363d;
+      border-radius: 10px;
+      padding: 1.5rem;
+    }
+
+    /* Tabelas */
+    table { width: 100%; border-collapse: collapse; }
+    .tabela-wrap { background: #161b22; border: 1px solid #30363d; border-radius: 10px; overflow: hidden; }
+    th, td { padding: 0.75rem 1rem; font-size: 0.88rem; text-align: left; border-bottom: 1px solid #21262d; }
+    thead tr { background: #21262d; }
+    th { color: #8b949e; font-weight: 600; font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.04em; }
+    td { color: #e6edf3; }
+    tr:last-child td { border-bottom: none; }
+    tr:hover td { background: #1c2128; }
+
+    /* Formulários */
+    .form-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 1rem; }
+    .form-group { display: flex; flex-direction: column; gap: 0.35rem; }
+    .form-group.full { grid-column: 1 / -1; }
+    .form-group label { font-size: 0.82rem; color: #8b949e; }
+    .form-group input,
+    .form-group select,
+    .form-group textarea {
+      padding: 0.55rem 0.8rem;
+      background: #0d1117;
+      border: 1px solid #30363d;
+      border-radius: 6px;
+      color: #e6edf3;
+      font-size: 0.9rem;
+      font-family: inherit;
+      outline: none;
+      transition: border-color 0.15s;
+    }
+    .form-group input:focus,
+    .form-group select:focus,
+    .form-group textarea:focus { border-color: #58a6ff; }
+    .form-group textarea { resize: vertical; min-height: 80px; }
+    .form-group .checkbox-row { display: flex; align-items: center; gap: 0.5rem; }
+    .form-group .checkbox-row input[type="checkbox"] { width: 16px; height: 16px; accent-color: #58a6ff; }
+
+    .checkboxes { display: flex; flex-wrap: wrap; gap: 0.5rem; }
+    .checkboxes label { display: flex; align-items: center; gap: 0.4rem; font-size: 0.85rem; color: #e6edf3; }
+    .checkboxes input[type="checkbox"] { accent-color: #58a6ff; }
+
+    .form-acoes { display: flex; gap: 0.8rem; margin-top: 1.5rem; }
+
+    /* Badges */
+    .badge { display: inline-block; padding: 0.15rem 0.55rem; border-radius: 12px; font-size: 0.72rem; font-weight: 600; }
+    .badge-admin    { background: rgba(88,166,255,0.15); color: #58a6ff; }
+    .badge-usuario  { background: rgba(63,185,80,0.15); color: #3fb950; }
+    .badge-titular  { background: rgba(63,185,80,0.15); color: #3fb950; }
+    .badge-sub      { background: rgba(210,153,34,0.15); color: #e3b341; }
+    .badge-intermediario { background: rgba(248,81,73,0.15); color: #f85149; }
+    .badge-vaga     { background: rgba(139,148,158,0.15); color: #8b949e; }
+    .badge-feriado  { background: rgba(130,80,255,0.15); color: #a371f7; }
+
+    /* Seção */
+    .secao-titulo {
+      font-size: 0.75rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: #8b949e;
+      margin-bottom: 0.8rem;
+    }
+
+    footer {
+      position: relative;
+      z-index: 1;
+      text-align: center;
+      padding: 0.8rem;
+      font-size: 0.75rem;
+      color: #484f58;
+      border-top: 1px solid #21262d;
+      line-height: 2;
+    }
+
+    @media print {
+      header, footer, nav, .btn, .sem-impressao { display: none !important; }
+      body { background: #fff; color: #000; }
+      .card, .tabela-wrap { border: 1px solid #ccc; }
+      th, td { border: 1px solid #ccc; }
+    }
+  </style>
+  {% block extra_css %}{% endblock %}
+</head>
+<body>
+
+<img class="bg-logo" src="/static/logo.png" alt="" aria-hidden="true" />
+
+<header>
+  <a class="header-titulo" href="/RJSS_Sistemas_Integrados/usuario/{{ session.usuario }}/">
+    <img src="/static/logo.png" alt="RJSS" />
+    RJSS Sistemas Integrados
+  </a>
+  <nav>
+    {% if session.papel == 'admin' %}
+      <a href="/RJSS_Sistemas_Integrados/admin/">Painel Admin</a>
+    {% endif %}
+    {% block nav_extra %}{% endblock %}
+    <a href="/RJSS_Sistemas_Integrados/manual/" target="_blank" title="Manual do usuário">📖 Manual</a>
+    <a href="/RJSS_Sistemas_Integrados/logout/" class="sair">Sair</a>
+  </nav>
+</header>
+
+<main>
+  {% with msgs = get_flashed_messages(with_categories=true) %}
+    {% for cat, msg in msgs %}
+      <div class="alerta {{ cat }}">{{ msg }}</div>
+    {% endfor %}
+  {% endwith %}
+
+  {% block conteudo %}{% endblock %}
+</main>
+
+<footer>
+  =============<br>
+  RJSS-Sistemas Integrados<br>
+  ronaldojuniosilvasantos@gmail.com<br>
+  =============
+</footer>
+
+</body>
+</html>

@@ -1,0 +1,49 @@
+{% extends 'base.html' %}
+{% block titulo %}Confirmar Feriados{% endblock %}
+
+{% block nav_extra %}
+  <a href="/RJSS_Sistemas_Integrados/usuario/{{ username }}/">Início</a>
+  <a href="/RJSS_Sistemas_Integrados/usuario/{{ username }}/gerar-escalas/">Gerar Escalas</a>
+{% endblock %}
+
+{% block conteudo %}
+<div class="page-header">
+  <h1>Feriados no período</h1>
+</div>
+
+<div class="alerta aviso">
+  Foram detectados feriados no período selecionado. Marque os funcionários que irão trabalhar em cada feriado antes de gerar a escala.
+</div>
+
+<form method="POST">
+  {% for info in info_feriados %}
+  <div class="card" style="margin-bottom:1rem;">
+    <p class="secao-titulo">🎉 {{ info.nome if info.nome else 'Feriado' }} — {{ info.data }}</p>
+
+    {% if info.funcionarios %}
+    <p style="font-size:0.85rem; color:#8b949e; margin-bottom:1rem;">
+      Selecione os funcionários disponíveis que trabalharão neste dia (respeitando folgas fixas e férias):
+    </p>
+    <div style="display:grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap:0.5rem;">
+      {% for f in info.funcionarios %}
+      <label style="display:flex; align-items:center; gap:0.6rem; padding:0.5rem 0.8rem; background:#0d1117; border:1px solid #30363d; border-radius:6px; cursor:pointer; font-size:0.88rem;">
+        <input type="checkbox" name="feriado_{{ info.data }}" value="{{ f.id }}" style="accent-color:#58a6ff;" />
+        <div>
+          <div style="color:#e6edf3; font-weight:600;">{{ f.nome }}</div>
+          <div style="color:#8b949e; font-size:0.78rem;">{{ cargos.get(f.cargo_primario, f.cargo_primario) }} — {{ f.turno | title }}</div>
+        </div>
+      </label>
+      {% endfor %}
+    </div>
+    {% else %}
+    <p style="font-size:0.85rem; color:#f85149;">Nenhum funcionário disponível para este feriado.</p>
+    {% endif %}
+  </div>
+  {% endfor %}
+
+  <div class="form-acoes">
+    <a href="/RJSS_Sistemas_Integrados/usuario/{{ username }}/gerar-escalas/" class="btn btn-cinza">Cancelar</a>
+    <button type="submit" class="btn btn-verde">Confirmar e gerar escala</button>
+  </div>
+</form>
+{% endblock %}

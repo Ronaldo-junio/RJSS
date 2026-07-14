@@ -1,0 +1,273 @@
+{% extends 'base.html' %}
+{% block titulo %}Configurações{% endblock %}
+
+{% block nav_extra %}
+  <a href="/RJSS_Sistemas_Integrados/usuario/{{ username }}/">Início</a>
+  <a href="/RJSS_Sistemas_Integrados/usuario/{{ username }}/gerar-escalas/">Gerar Escalas</a>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+  .caixa-card {
+    background: #161b22;
+    border: 1px solid #30363d;
+    border-radius: 8px;
+    padding: 1rem;
+    margin-bottom: 0.75rem;
+  }
+  .caixa-header { display:flex; align-items:center; gap:0.7rem; margin-bottom:0.75rem; flex-wrap:wrap; }
+  .caixa-header input[type="text"] { width:70px; }
+  .caixa-header select { width:150px; }
+  .caixa-header .btn-rm { padding:0.3rem 0.6rem; font-size:0.8rem; cursor:pointer; background:#b62324; color:#fff; border:none; border-radius:4px; }
+  .caixa-status { display:flex; gap:1rem; font-size:0.83rem; flex-wrap:wrap; }
+  .caixa-status label { display:flex; align-items:center; gap:0.35rem; color:#8b949e; cursor:pointer; }
+  .badge-tipo { font-size:0.72rem; padding:0.2rem 0.5rem; border-radius:12px; font-weight:600; }
+  .badge-preferencial { background:#0d2236; color:#58a6ff; border:1px solid #1f6feb; }
+  .badge-rapido { background:#1d2d0a; color:#3fb950; border:1px solid #2ea043; }
+  .badge-normal { background:#21262d; color:#8b949e; border:1px solid #30363d; }
+
+  .feriado-linha {
+    display: grid;
+    grid-template-columns: 180px 1fr auto;
+    gap: 0.6rem;
+    align-items: end;
+    background: #0d1117;
+    border: 1px solid #30363d;
+    border-radius: 6px;
+    padding: 0.6rem 0.8rem;
+    margin-bottom: 0.5rem;
+  }
+  .feriado-linha label { font-size: 0.75rem; color: #8b949e; display: block; margin-bottom: 0.2rem; }
+  .feriado-linha input { width: 100%; padding: 0.45rem 0.6rem; background: #161b22; border: 1px solid #30363d; border-radius: 5px; color: #e6edf3; font-size: 0.85rem; }
+  .feriado-linha input:focus { outline: none; border-color: #58a6ff; }
+  .btn-rm-feriado { padding: 0.4rem 0.6rem; background: #b62324; color: #fff; border: none; border-radius: 5px; cursor: pointer; font-size: 0.8rem; align-self: end; }
+  .btn-rm-feriado:hover { background: #d1242f; }
+  @media (max-width: 600px) {
+    .feriado-linha { grid-template-columns: 1fr auto; }
+    .feriado-linha > div:first-child { grid-column: 1; }
+    .feriado-linha > div:nth-child(2) { grid-column: 1; }
+  }
+</style>
+{% endblock %}
+
+{% block conteudo %}
+<div class="page-header">
+  <h1>Configurações — Linha de Frente</h1>
+</div>
+
+<div class="card">
+  <form method="POST" id="form-config">
+
+    <p class="secao-titulo">Configurações gerais</p>
+    <div class="form-grid" style="margin-bottom:1.5rem;">
+      <div class="form-group">
+        <label>Período de geração (dias)</label>
+        <input type="number" name="periodo_dias" value="{{ config.periodo_geracao_dias }}" min="1" max="31" />
+      </div>
+      <div class="form-group">
+        <div class="checkbox-row" style="margin-top:1.5rem;">
+          <input type="checkbox" id="turnos_fixos" name="turnos_fixos" {{ 'checked' if config.turnos_fixos }} />
+          <label for="turnos_fixos">Turnos fixos ativados</label>
+        </div>
+      </div>
+    </div>
+
+    <hr style="border:none; border-top:1px solid #21262d; margin:1.5rem 0;" />
+
+    {% for turno_nome in ['manha', 'tarde'] %}
+    {% set t = config.turnos[turno_nome] %}
+    <p class="secao-titulo">Turno {{ 'manhã' if turno_nome == 'manha' else 'tarde' }}</p>
+    <div class="form-grid" style="margin-bottom:1.5rem;">
+      <div class="form-group">
+        <label>Horário início</label>
+        <input type="time" name="{{ turno_nome }}_inicio" value="{{ t.horario_inicio }}" />
+      </div>
+      <div class="form-group">
+        <label>Horário fim</label>
+        <input type="time" name="{{ turno_nome }}_fim" value="{{ t.horario_fim }}" />
+      </div>
+      <div class="form-group">
+        <label>Supervisores por turno</label>
+        <input type="number" name="{{ turno_nome }}_supervisores" value="{{ t.supervisores }}" min="0" max="10" />
+      </div>
+      <div class="form-group">
+        <label>Operadores de caixa por turno</label>
+        <input type="number" name="{{ turno_nome }}_caixas" value="{{ t.operadores_caixa }}" min="0" max="20" />
+      </div>
+      <div class="form-group">
+        <label>Embaladores por turno</label>
+        <input type="number" name="{{ turno_nome }}_embaladores" value="{{ t.embaladores }}" min="0" max="10" />
+      </div>
+      <div class="form-group">
+        <label>Guarda-volumes por turno</label>
+        <input type="number" name="{{ turno_nome }}_guarda_volumes" value="{{ t.guarda_volumes }}" min="0" max="10" />
+      </div>
+    </div>
+    {% if turno_nome == 'manha' %}
+    <hr style="border:none; border-top:1px solid #21262d; margin:1.5rem 0;" />
+    {% endif %}
+    {% endfor %}
+
+    <hr style="border:none; border-top:1px solid #21262d; margin:1.5rem 0;" />
+
+    <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:0.5rem;">
+      <p class="secao-titulo" style="margin:0;">Caixas disponíveis</p>
+      <button type="button" class="btn btn-verde btn-sm" onclick="addCaixa()">+ Adicionar caixa</button>
+    </div>
+
+    <div style="font-size:0.82rem; color:#8b949e; margin-bottom:1rem; display:flex; gap:1rem; flex-wrap:wrap;">
+      <span><span class="badge-tipo badge-preferencial">Preferencial</span> — Caixa 1 · Idosos, gestantes e pessoas com deficiência</span>
+      <span><span class="badge-tipo badge-normal">Normal</span> — Caixas 2, 3, 4 · Atendimento geral</span>
+      <span><span class="badge-tipo badge-rapido">Rápido</span> — Caixas 5, 6 · Máx. 20 volumes · Sem embalador</span>
+    </div>
+
+    <div id="caixas-container">
+      {% for cx in config.caixas %}
+      {% set idx = loop.index0 %}
+      <div class="caixa-card">
+        <div class="caixa-header">
+          <input type="hidden" name="caixa_id" value="{{ cx.id }}" />
+          <span style="font-size:0.85rem; color:#8b949e; min-width:60px;">Caixa nº</span>
+          <input type="text" name="caixa_numero" value="{{ cx.numero }}" placeholder="ex: 01" />
+          <select name="caixa_tipo">
+            <option value="preferencial" {{ 'selected' if cx.tipo == 'preferencial' }}>Preferencial</option>
+            <option value="normal"       {{ 'selected' if cx.tipo == 'normal' }}>Normal</option>
+            <option value="rapido"       {{ 'selected' if cx.tipo == 'rapido' }}>Rápido</option>
+          </select>
+          <button type="button" class="btn-rm" onclick="this.closest('.caixa-card').remove()">✕ Remover</button>
+        </div>
+
+        <div style="margin-bottom:0.6rem;">
+          <label style="font-size:0.82rem; color:#8b949e;">Restrições ergonômicas (opcional)</label>
+          <input type="text" name="caixa_restricoes"
+                 value="{{ cx.restricoes_ergonomicas or '' }}"
+                 placeholder="ex.: não usar para laudo de coluna, apenas sentado"
+                 style="width:100%; margin-top:0.3rem;" />
+        </div>
+
+        <div>
+          <span style="font-size:0.82rem; color:#8b949e; display:block; margin-bottom:0.4rem;">Status por turno:</span>
+          <div class="caixa-status">
+            {% for turno_nome in config.turnos.keys() %}
+            {% set status_val = cx.get('status_turno', {}).get(turno_nome, 'aberto') %}
+            <label>
+              <input type="checkbox" name="caixa_status_{{ turno_nome }}_{{ idx }}"
+                     value="aberto" {{ 'checked' if status_val == 'aberto' }} />
+              Turno {{ 'manhã' if turno_nome == 'manha' else turno_nome }} aberto
+            </label>
+            {% endfor %}
+          </div>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+
+    <hr style="border:none; border-top:1px solid #21262d; margin:1.5rem 0;" />
+
+    <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:0.5rem;">
+      <p class="secao-titulo" style="margin:0;">Feriados locais</p>
+      <button type="button" class="btn btn-verde btn-sm" onclick="addFeriado()">+ Adicionar feriado</button>
+    </div>
+    <p style="font-size:0.82rem; color:#8b949e; margin-bottom:1rem;">
+      Feriados municipais ou estaduais que não são nacionais. Serão tratados da mesma forma que os feriados nacionais na geração de escalas.
+    </p>
+
+    <div id="feriados-container">
+      {% for f in config.feriados_locais %}
+      <div class="feriado-linha">
+        <div>
+          <label>Data *</label>
+          <input type="date" name="feriado_local_data[]" value="{{ f.data }}" required />
+        </div>
+        <div>
+          <label>Nome</label>
+          <input type="text" name="feriado_local_nome[]" value="{{ f.nome }}" placeholder="Ex: Aniversário da cidade" />
+        </div>
+        <button type="button" class="btn-rm-feriado" onclick="this.closest('.feriado-linha').remove()">✕</button>
+      </div>
+      {% endfor %}
+    </div>
+
+    <div class="form-acoes" style="margin-top:1.5rem;">
+      <a href="/RJSS_Sistemas_Integrados/usuario/{{ username }}/gerar-escalas/" class="btn btn-cinza">Cancelar</a>
+      <button type="submit" class="btn btn-verde">Salvar configurações</button>
+    </div>
+
+  </form>
+</div>
+
+<script>
+  let caixaCount = {{ config.caixas | length }};
+  const turnos = {{ config.turnos.keys() | list | tojson }};
+
+  function addCaixa() {
+    const container = document.getElementById('caixas-container');
+    const idx = caixaCount++;
+    const statusChecks = turnos.map(t =>
+      `<label>
+        <input type="checkbox" name="caixa_status_${t}_${idx}" value="aberto" checked />
+        Turno ${t === 'manha' ? 'manhã' : t} aberto
+      </label>`
+    ).join('');
+
+    const div = document.createElement('div');
+    div.className = 'caixa-card';
+    div.innerHTML = `
+      <div class="caixa-header">
+        <input type="hidden" name="caixa_id" value="" />
+        <span style="font-size:0.85rem;color:#8b949e;min-width:60px;">Caixa nº</span>
+        <input type="text" name="caixa_numero" placeholder="ex: 07" />
+        <select name="caixa_tipo">
+          <option value="preferencial">Preferencial</option>
+          <option value="normal" selected>Normal</option>
+          <option value="rapido">Rápido</option>
+        </select>
+        <button type="button" class="btn-rm" onclick="this.closest('.caixa-card').remove()">✕ Remover</button>
+      </div>
+      <div style="margin-bottom:0.6rem;">
+        <label style="font-size:0.82rem;color:#8b949e;">Restrições ergonômicas (opcional)</label>
+        <input type="text" name="caixa_restricoes" placeholder="ex.: apenas sentado"
+               style="width:100%;margin-top:0.3rem;" />
+      </div>
+      <div>
+        <span style="font-size:0.82rem;color:#8b949e;display:block;margin-bottom:0.4rem;">Status por turno:</span>
+        <div class="caixa-status">${statusChecks}</div>
+      </div>
+    `;
+    container.appendChild(div);
+  }
+</script>
+
+<script>
+  function addFeriado() {
+    const container = document.getElementById('feriados-container');
+    const div = document.createElement('div');
+    div.className = 'feriado-linha';
+    div.innerHTML = `
+      <div>
+        <label>Data *</label>
+        <input type="date" name="feriado_local_data[]" required />
+      </div>
+      <div>
+        <label>Nome</label>
+        <input type="text" name="feriado_local_nome[]" placeholder="Ex: Aniversário da cidade" />
+      </div>
+      <button type="button" class="btn-rm-feriado" onclick="this.closest('.feriado-linha').remove()">✕</button>
+    `;
+    container.appendChild(div);
+  }
+</script>
+
+<script>
+  // Converte checkboxes de status para campos hidden antes de submeter
+  document.getElementById('form-config').addEventListener('submit', function(e) {
+    const cards = document.querySelectorAll('.caixa-card');
+    cards.forEach((card, idx) => {
+      turnos.forEach(turno => {
+        const cb = card.querySelector(`input[name="caixa_status_${turno}_${idx}"]`);
+        // Se não existe ou não marcado → fechado; já existe o valor correto no name
+      });
+    });
+  });
+</script>
+{% endblock %}

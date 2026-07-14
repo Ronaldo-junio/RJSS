@@ -1,0 +1,8 @@
+[Desktop Entry]
+Version=2.05.04
+Type=Application
+Name=RJSS Sistemas Integrados
+EXEC=/home/ronaldo/Área de Trabalho/RJSS_2.05.04/start.sh
+Icon=/home/ronaldo/Área de Trabalho/RJSS_2.05.04/static/logo.png
+Terminal=true
+Categories=Servidor;

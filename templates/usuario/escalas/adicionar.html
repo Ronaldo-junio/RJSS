@@ -1,0 +1,282 @@
+{% extends 'base.html' %}
+{% block titulo %}Editar Dia{% endblock %}
+
+{% block nav_extra %}
+  <a href="/RJSS_Sistemas_Integrados/usuario/{{ username }}/">Início</a>
+  <a href="/RJSS_Sistemas_Integrados/usuario/{{ username }}/escalas/">Escalas</a>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+  .linha-func {
+    display: grid;
+    grid-template-columns: 130px 1fr 1fr 1fr auto;
+    gap: 0.5rem;
+    align-items: end;
+    background: #0d1117;
+    border: 1px solid #30363d;
+    border-radius: 6px;
+    padding: 0.6rem 0.8rem;
+    margin-bottom: 0.5rem;
+  }
+  .linha-func label { font-size: 0.75rem; color: #8b949e; display: block; margin-bottom: 0.2rem; }
+  .linha-func input, .linha-func select {
+    width: 100%; padding: 0.45rem 0.6rem;
+    background: #161b22; border: 1px solid #30363d;
+    border-radius: 5px; color: #e6edf3; font-size: 0.85rem;
+  }
+  .linha-func input:focus, .linha-func select:focus { outline: none; border-color: #58a6ff; }
+  .btn-rm-linha { padding: 0.4rem 0.6rem; background: #b62324; color: #fff; border: none; border-radius: 5px; cursor: pointer; font-size: 0.8rem; align-self: end; }
+  .btn-rm-linha:hover { background: #d1242f; }
+
+  .ac-wrap { position: relative; }
+  .ac-drop {
+    position: absolute; top: 100%; left: 0; right: 0;
+    background: #161b22; border: 1px solid #30363d;
+    border-top: none; border-radius: 0 0 6px 6px;
+    max-height: 200px; overflow-y: auto; z-index: 200; display: none;
+  }
+  .ac-drop li { padding: 0.5rem 0.7rem; cursor: pointer; color: #e6edf3; font-size: 0.85rem; list-style: none; }
+  .ac-drop li small { color: #8b949e; font-size: 0.75rem; }
+  .ac-drop li:hover, .ac-drop li.ativo { background: #1c2128; color: #58a6ff; }
+
+  .dia-existente-aviso {
+    background: rgba(88,166,255,0.08); border: 1px solid rgba(88,166,255,0.25);
+    border-radius: 8px; padding: 0.7rem 1rem; font-size: 0.85rem; color: #93c5fd;
+    margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem;
+  }
+  @media (max-width: 700px) {
+    .linha-func { grid-template-columns: 1fr 1fr; }
+  }
+</style>
+{% endblock %}
+
+{% block conteudo %}
+<div class="page-header">
+  <h1>Editar dia completo</h1>
+  <a href="/RJSS_Sistemas_Integrados/usuario/{{ username }}/escalas/" class="btn btn-cinza">← Voltar</a>
+</div>
+
+{% with msgs = get_flashed_messages(with_categories=true) %}
+  {% for cat, msg in msgs %}<div class="alerta {{ cat }}">{{ msg }}</div>{% endfor %}
+{% endwith %}
+
+<div class="card">
+  <!-- Seleção de data -->
+  <p class="secao-titulo">Data</p>
+  <div style="display:flex; gap:0.8rem; align-items:flex-end; margin-bottom:1.2rem; flex-wrap:wrap;">
+    <div class="form-group" style="margin:0; flex:0 0 180px;">
+      <label for="campo-data">Data *</label>
+      <input type="date" id="campo-data" value="{{ data_pre }}" />
+    </div>
+    <button type="button" class="btn btn-cinza" onclick="carregarDia()">Carregar dia</button>
+  </div>
+
+  <div id="aviso-dia" style="display:none;" class="dia-existente-aviso">
+    ℹ️ <span id="aviso-texto"></span>
+  </div>
+
+  <form method="POST" id="form-dia">
+    <input type="hidden" name="data" id="input-data" value="{{ data_pre }}" />
+
+    <hr style="border:none; border-top:1px solid #21262d; margin:1rem 0 1.2rem;" />
+    <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:0.8rem; flex-wrap:wrap; gap:0.5rem;">
+      <p class="secao-titulo" style="margin:0;">Funcionários do dia</p>
+      <button type="button" class="btn btn-verde btn-sm" onclick="addLinha()">+ Adicionar funcionário</button>
+    </div>
+
+    <div style="font-size:0.75rem; color:#8b949e; display:grid; grid-template-columns: 130px 1fr 1fr 1fr auto; gap:0.5rem; padding:0 0.8rem; margin-bottom:0.3rem;">
+      <span>Turno</span><span>Funcionário</span><span>Local / Função</span><span>Destino especial</span><span></span>
+    </div>
+
+    <div id="linhas-container">
+      {% if dia_existente %}
+        {% for turno_nome, turno_dados in dia_existente.turnos.items() %}
+          {% for cargo_cod, cargo_dados in turno_dados.cargos.items() %}
+            {% for f in cargo_dados.funcionarios %}
+              {% if f.id %}
+              <script>
+                window._linhasIniciais = window._linhasIniciais || [];
+                window._linhasIniciais.push({
+                  turno: {{ turno_nome | tojson }},
+                  func_id: {{ f.id | tojson }},
+                  func_nome: {{ f.nome | tojson }},
+                  local: {% if f.get('caixa_numero') %}"Caixa {{ f.caixa_numero }}"{% elif cargo_cod == 'supervisor' %}"Supervisor"{% elif cargo_cod == 'embalador' %}"Embalador"{% elif cargo_cod == 'guarda_volumes' %}"Guarda-Volumes"{% else %}""{% endif %},
+                  destino: {{ (f.destino if f.get('destino') else '') | tojson }}
+                });
+              </script>
+              {% endif %}
+            {% endfor %}
+          {% endfor %}
+        {% endfor %}
+      {% endif %}
+    </div>
+
+    <div class="form-acoes" style="margin-top:1rem;">
+      <a href="/RJSS_Sistemas_Integrados/usuario/{{ username }}/escalas/" class="btn btn-cinza">Cancelar</a>
+      <button type="submit" class="btn btn-azul" id="btn-salvar">Salvar dia</button>
+    </div>
+  </form>
+</div>
+
+<script>
+const funcionarios = {{ funcionarios | tojson }};
+const locais       = {{ locais | tojson }};
+const turnos       = {{ turnos | tojson }};
+const cargoNomes   = { operador_caixa:'Operador de Caixa', supervisor:'Supervisor', embalador:'Embalador', guarda_volumes:'Guarda-Volumes' };
+
+function makeAC({ input, drop, items, filterFn, renderItem, onSelect }) {
+  let idx = -1;
+  function render(q) {
+    const res = filterFn(items, q);
+    drop.innerHTML = ''; idx = -1;
+    if (!res.length || !q) { drop.style.display='none'; return; }
+    res.forEach(item => {
+      const li = document.createElement('li');
+      li.innerHTML = renderItem(item);
+      li.addEventListener('mousedown', () => { onSelect(item); drop.style.display='none'; });
+      drop.appendChild(li);
+    });
+    drop.style.display='block';
+  }
+  input.addEventListener('input',  () => render(input.value));
+  input.addEventListener('focus',  () => { if (input.value) render(input.value); });
+  input.addEventListener('blur',   () => setTimeout(() => drop.style.display='none', 150));
+  input.addEventListener('keydown', e => {
+    const its = drop.querySelectorAll('li');
+    if (e.key==='ArrowDown') idx = Math.min(idx+1, its.length-1);
+    else if (e.key==='ArrowUp') idx = Math.max(idx-1, 0);
+    else if (e.key==='Enter' && idx>=0) { e.preventDefault(); its[idx].dispatchEvent(new Event('mousedown')); return; }
+    else return;
+    its.forEach((li,i) => li.classList.toggle('ativo', i===idx));
+  });
+}
+
+function addLinha(dados) {
+  dados = dados || {};
+  const container = document.getElementById('linhas-container');
+  const id = 'linha-' + Date.now() + '-' + Math.random().toString(36).slice(2);
+
+  const turnoOpts = turnos.map(t =>
+    `<option value="${t}" ${dados.turno===t?'selected':''}>${t==='manha'?'Manhã':t.charAt(0).toUpperCase()+t.slice(1)}</option>`
+  ).join('');
+
+  const div = document.createElement('div');
+  div.className = 'linha-func';
+  div.id = id;
+  div.innerHTML = `
+    <div>
+      <label>Turno *</label>
+      <select name="turno[]">${turnoOpts}</select>
+    </div>
+    <div>
+      <label>Funcionário *</label>
+      <div class="ac-wrap">
+        <input type="text" class="ac-func-input" placeholder="Nome..." autocomplete="off" value="${dados.func_nome||''}" />
+        <input type="hidden" name="func_id[]" class="ac-func-id" value="${dados.func_id||''}" />
+        <ul class="ac-drop ac-func-drop"></ul>
+      </div>
+    </div>
+    <div>
+      <label>Local / Função *</label>
+      <div class="ac-wrap">
+        <input type="text" class="ac-local-input" name="local[]" placeholder="Ex: Caixa 01..." autocomplete="off" value="${dados.local||''}" />
+        <ul class="ac-drop ac-local-drop"></ul>
+      </div>
+    </div>
+    <div>
+      <label>Destino especial</label>
+      <input type="text" name="destino[]" placeholder="Ex: Financeiro" value="${dados.destino||''}" />
+    </div>
+    <button type="button" class="btn-rm-linha" onclick="document.getElementById('${id}').remove()">✕</button>
+  `;
+  container.appendChild(div);
+
+  // Autocomplete funcionário
+  const funcInput = div.querySelector('.ac-func-input');
+  const funcIdInput = div.querySelector('.ac-func-id');
+  const funcDrop = div.querySelector('.ac-func-drop');
+  makeAC({
+    input: funcInput, drop: funcDrop, items: funcionarios,
+    filterFn: (items, q) => items.filter(f => f.nome.toLowerCase().includes(q.toLowerCase())),
+    renderItem: f => `${f.nome} <small>· ${cargoNomes[f.cargo_primario]||f.cargo_primario||''}</small>`,
+    onSelect: f => { funcInput.value = f.nome; funcIdInput.value = f.id; funcInput.style.borderColor=''; }
+  });
+  funcInput.addEventListener('input', () => { funcIdInput.value = ''; funcInput.style.borderColor=''; });
+
+  // Autocomplete local
+  const localInput = div.querySelector('.ac-local-input');
+  const localDrop = div.querySelector('.ac-local-drop');
+  makeAC({
+    input: localInput, drop: localDrop, items: locais,
+    filterFn: (items, q) => items.filter(l => l.toLowerCase().includes(q.toLowerCase())),
+    renderItem: l => l,
+    onSelect: l => { localInput.value = l; }
+  });
+}
+
+// Carrega dia via AJAX
+async function carregarDia() {
+  const data = document.getElementById('campo-data').value;
+  if (!data) return;
+  document.getElementById('input-data').value = data;
+
+  const res = await fetch(`/RJSS_Sistemas_Integrados/usuario/{{ username }}/escalas/dia-json/?data=${data}`);
+  const json = await res.json();
+  const aviso = document.getElementById('aviso-dia');
+  const avisoTexto = document.getElementById('aviso-texto');
+  const container = document.getElementById('linhas-container');
+  container.innerHTML = '';
+
+  if (json.encontrado) {
+    aviso.style.display = 'flex';
+    avisoTexto.textContent = 'Dia já existe — carregado para edição. Salvar substituirá o conteúdo atual.';
+    const dia = json.dia;
+    for (const [turnoNome, turnoDados] of Object.entries(dia.turnos || {})) {
+      for (const [cargoCod, cargoDados] of Object.entries(turnoDados.cargos || {})) {
+        for (const f of (cargoDados.funcionarios || [])) {
+          if (!f.id) continue;
+          let local = '';
+          if (f.caixa_numero) local = 'Caixa ' + f.caixa_numero;
+          else if (cargoCod === 'supervisor') local = 'Supervisor';
+          else if (cargoCod === 'embalador') local = 'Embalador';
+          else if (cargoCod === 'guarda_volumes') local = 'Guarda-Volumes';
+          addLinha({ turno: turnoNome, func_id: f.id, func_nome: f.nome, local, destino: f.destino||'' });
+        }
+      }
+    }
+  } else {
+    aviso.style.display = 'flex';
+    avisoTexto.textContent = 'Nenhuma escala para este dia — você está criando do zero.';
+  }
+}
+
+// Validação antes de submeter
+document.getElementById('form-dia').addEventListener('submit', e => {
+  const data = document.getElementById('input-data').value;
+  if (!data) { e.preventDefault(); document.getElementById('campo-data').focus(); return; }
+  let ok = true;
+  document.querySelectorAll('.ac-func-id').forEach(inp => {
+    if (!inp.value) {
+      ok = false;
+      inp.closest('.linha-func').querySelector('.ac-func-input').style.borderColor = '#f85149';
+    }
+  });
+  if (!ok) { e.preventDefault(); alert('Selecione todos os funcionários da lista de sugestões.'); }
+});
+
+// Inicializa linhas pré-carregadas (dia existente passado via template)
+window.addEventListener('DOMContentLoaded', () => {
+  if (window._linhasIniciais && window._linhasIniciais.length) {
+    window._linhasIniciais.forEach(addLinha);
+    const aviso = document.getElementById('aviso-dia');
+    document.getElementById('aviso-texto').textContent = 'Dia já existe — carregado para edição. Salvar substituirá o conteúdo atual.';
+    aviso.style.display = 'flex';
+  }
+  // Sincroniza campo de data visível com o hidden
+  document.getElementById('campo-data').addEventListener('change', function() {
+    document.getElementById('input-data').value = this.value;
+  });
+});
+</script>
+{% endblock %}
