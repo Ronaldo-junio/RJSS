@@ -9,14 +9,21 @@ CARGOS = {
 
 DIAS_PT = {0: 'segunda', 1: 'terca', 2: 'quarta', 3: 'quinta', 4: 'sexta', 5: 'sabado', 6: 'domingo'}
 
-REGIMES_TRABALHO = {
-    '44h': {'horas_semanais': 44, 'descricao': '44h semanais (CLT padrão)'},
-    '48h': {'horas_semanais': 48, 'descricao': '48h semanais (máximo CLT)'},
-    '36h': {'horas_semanais': 36, 'descricao': '36h semanais'},
-    '32h': {'horas_semanais': 32, 'descricao': '32h semanais'},
-    '30h': {'horas_semanais': 30, 'descricao': '30h semanais'},
-    '5x2': {'horas_semanais': None, 'descricao': '5x2 (5 dias trabalho, 2 folgas consecutivas)'},
+ESCALAS_PADRAO = {
+    '5x2': {'dias_trabalho': 5, 'descricao': '5x2 — 5 dias de trabalho / 2 folgas por semana'},
+    '6x1': {'dias_trabalho': 6, 'descricao': '6x1 — 6 dias de trabalho / 1 folga por semana'},
 }
+
+HORAS_SEMANAIS = {
+    '44h': {'horas': 44, 'descricao': '44h semanais (CLT padrão)'},
+    '48h': {'horas': 48, 'descricao': '48h semanais (máximo CLT)'},
+    '36h': {'horas': 36, 'descricao': '36h semanais'},
+    '32h': {'horas': 32, 'descricao': '32h semanais'},
+    '30h': {'horas': 30, 'descricao': '30h semanais'},
+}
+
+# Mantido para compatibilidade com imports externos
+REGIMES_TRABALHO = {k: {'horas_semanais': v['horas'], 'descricao': v['descricao']} for k, v in HORAS_SEMANAIS.items()}
 
 
 # ── Feriados nacionais (fixos + móveis) ───────────────────────────────────────
@@ -301,19 +308,17 @@ def _planejar_folgas_regime(funcionarios, config, datas_semana):
     garantindo que os dias mais cheios absorvam as ausências.
     Retorna {func_id: set(data_str)} com TODAS as folgas da semana.
     """
-    regime = config.get('regime_trabalho', '44h')
+    escala = config.get('escala_padrao', '5x2')
+    horas_key = config.get('horas_semanais', '44h')
     if not datas_semana:
         return {}
 
-    # Dias de trabalho alvo por semana
-    if regime == '5x2':
-        dias_trabalho_alvo = 5
-    else:
-        info = REGIMES_TRABALHO.get(regime, REGIMES_TRABALHO['44h'])
-        h_sem = info.get('horas_semanais') or 44
-        turnos_cfg = config.get('turnos', {})
-        h_media = (sum(horas_turno(t) for t in turnos_cfg.values()) / len(turnos_cfg)) if turnos_cfg else 8.0
-        dias_trabalho_alvo = min(len(datas_semana), max(1, round(h_sem / h_media)))
+    # Dias de trabalho alvo: definido pela escala (5x2 → 5, 6x1 → 6)
+    info_escala = ESCALAS_PADRAO.get(escala, ESCALAS_PADRAO['5x2'])
+    dias_trabalho_alvo = min(len(datas_semana), info_escala['dias_trabalho'])
+
+    # Horas semanais: informacional — usado para validação futura e exibição
+    h_semanais = HORAS_SEMANAIS.get(horas_key, HORAS_SEMANAIS['44h'])['horas']  # noqa: F841
 
     folgas = {f['id']: set() for f in funcionarios}
 

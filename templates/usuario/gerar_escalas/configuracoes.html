@@ -65,19 +65,32 @@
         <input type="number" name="periodo_dias" value="{{ config.periodo_geracao_dias }}" min="1" max="31" />
       </div>
       <div class="form-group">
-        <label>Regime de trabalho</label>
-        <select name="regime_trabalho">
-          {% set r = config.get('regime_trabalho', '44h') %}
-          <option value="44h" {{ 'selected' if r == '44h' }}>44h semanais (CLT padrão)</option>
-          <option value="48h" {{ 'selected' if r == '48h' }}>48h semanais (máximo CLT)</option>
-          <option value="36h" {{ 'selected' if r == '36h' }}>36h semanais</option>
-          <option value="32h" {{ 'selected' if r == '32h' }}>32h semanais</option>
-          <option value="30h" {{ 'selected' if r == '30h' }}>30h semanais</option>
-          <option value="5x2" {{ 'selected' if r == '5x2' }}>5x2 — 5 dias trabalho / 2 folgas</option>
+        <label>Escala de trabalho</label>
+        <select name="escala_padrao">
+          {% set ep = config.get('escala_padrao', '5x2') %}
+          <option value="5x2" {{ 'selected' if ep == '5x2' }}>5x2 — 5 dias de trabalho / 2 folgas por semana</option>
+          <option value="6x1" {{ 'selected' if ep == '6x1' }}>6x1 — 6 dias de trabalho / 1 folga por semana</option>
         </select>
         <p style="font-size:0.78rem; color:#8b949e; margin-top:0.3rem;">
-          O sistema distribui as folgas automaticamente para manter a cobertura mínima em cada dia.
-          As folgas de domingo seguem a rotação individual de cada funcionário.
+          Define quantos dias por semana cada funcionário trabalha.
+          As folgas são distribuídas automaticamente nos dias com maior cobertura.
+        </p>
+      </div>
+      <div class="form-group">
+        <label>Carga horária semanal</label>
+        <select name="horas_semanais">
+          {% set hs = config.get('horas_semanais', '44h') %}
+          <option value="44h" {{ 'selected' if hs == '44h' }}>44h semanais (CLT padrão)</option>
+          <option value="48h" {{ 'selected' if hs == '48h' }}>48h semanais (máximo CLT)</option>
+          <option value="36h" {{ 'selected' if hs == '36h' }}>36h semanais</option>
+          <option value="32h" {{ 'selected' if hs == '32h' }}>32h semanais</option>
+          <option value="30h" {{ 'selected' if hs == '30h' }}>30h semanais</option>
+        </select>
+        <p style="font-size:0.78rem; color:#8b949e; margin-top:0.3rem;">
+          Carga horária contratual. Combinada com a escala determina a jornada diária.<br>
+          Ex: 5x2 + 44h = <strong style="color:#e6edf3;">8h48 por dia</strong> &nbsp;|&nbsp;
+          5x2 + 40h = <strong style="color:#e6edf3;">8h por dia</strong> &nbsp;|&nbsp;
+          6x1 + 48h = <strong style="color:#e6edf3;">8h por dia</strong>
         </p>
       </div>
       <div class="form-group">

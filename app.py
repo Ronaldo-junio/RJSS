@@ -57,7 +57,8 @@ def get_config(username):
     default = {
         'turnos_fixos': True,
         'periodo_geracao_dias': 7,
-        'regime_trabalho': '44h',
+        'escala_padrao': '5x2',
+        'horas_semanais': '44h',
         'turnos': {
             'manha': {'horario_inicio': '06:00', 'horario_fim': '14:00',
                       'supervisores': 1, 'operadores_caixa': 3, 'embaladores': 1, 'guarda_volumes': 1},
@@ -71,8 +72,10 @@ def get_config(username):
         cfg['caixas'] = []
     if 'feriados_locais' not in cfg:
         cfg['feriados_locais'] = []
-    if 'regime_trabalho' not in cfg:
-        cfg['regime_trabalho'] = '44h'
+    if 'escala_padrao' not in cfg:
+        cfg['escala_padrao'] = cfg.pop('regime_trabalho', '5x2')
+    if 'horas_semanais' not in cfg:
+        cfg['horas_semanais'] = '44h'
     return cfg
 
 def save_config(username, data):
@@ -484,7 +487,8 @@ def configuracoes_escala(username):
     if request.method == 'POST':
         config['turnos_fixos'] = 'turnos_fixos' in request.form
         config['periodo_geracao_dias'] = int(request.form.get('periodo_dias', 7))
-        config['regime_trabalho'] = request.form.get('regime_trabalho', '44h')
+        config['escala_padrao'] = request.form.get('escala_padrao', '5x2')
+        config['horas_semanais'] = request.form.get('horas_semanais', '44h')
         for turno in ['manha', 'tarde']:
             config['turnos'][turno] = {
                 'horario_inicio': request.form.get(f'{turno}_inicio', ''),

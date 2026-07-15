@@ -21,16 +21,17 @@
         <label>Data de início da escala</label>
         <input type="date" name="data_inicio" required />
       </div>
-      <p style="font-size:0.82rem; color:#8b949e; margin-bottom:1.2rem;">
-        Período de geração: <strong style="color:#e6edf3;">{{ config.periodo_geracao_dias }} dias</strong>
-        — altere em <a href="/usuario/{{ username }}/gerar-escalas/configuracoes/" style="color:#58a6ff;">configurações</a>.
-      </p>
-      <p style="font-size:0.82rem; color:#8b949e; margin-bottom:1.5rem;">
-        Turnos fixos:
-        <strong style="color:{{ '#3fb950' if config.turnos_fixos else '#f85149' }};">
-          {{ 'Ativados' if config.turnos_fixos else 'Desativados' }}
-        </strong>
-      </p>
+      <div style="font-size:0.82rem; color:#8b949e; margin-bottom:1.5rem; display:flex; flex-direction:column; gap:0.4rem;">
+        <span>Período: <strong style="color:#e6edf3;">{{ config.periodo_geracao_dias }} dias</strong></span>
+        <span>Escala: <strong style="color:#e6edf3;">{{ config.get('escala_padrao', '5x2') }}</strong>
+              &nbsp;·&nbsp; Carga: <strong style="color:#e6edf3;">{{ config.get('horas_semanais', '44h') }}</strong></span>
+        <span>Turnos fixos:
+          <strong style="color:{{ '#3fb950' if config.turnos_fixos else '#f85149' }};">
+            {{ 'Ativados' if config.turnos_fixos else 'Desativados' }}
+          </strong>
+        </span>
+        <a href="/usuario/{{ username }}/gerar-escalas/configuracoes/" style="color:#58a6ff; margin-top:0.2rem;">⚙ Alterar configurações</a>
+      </div>
       <button type="submit" class="btn btn-verde" style="width:100%;">Gerar escala</button>
     </form>
   </div>
