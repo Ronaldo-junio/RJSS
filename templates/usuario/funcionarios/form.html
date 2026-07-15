@@ -53,6 +53,43 @@
 
     <hr style="border:none; border-top:1px solid #21262d; margin:1.5rem 0;" />
 
+    <p class="secao-titulo">Regime de trabalho</p>
+    <p style="font-size:0.82rem; color:#8b949e; margin-bottom:1rem;">
+      Define o limite de horas semanais e o padrão de folgas do funcionário.
+    </p>
+    <div class="form-grid">
+      <div class="form-group">
+        <label>Regime *</label>
+        <select name="regime_trabalho" id="regime-select" onchange="toggleFolga5x2()">
+          {% set regime_atual = func.get('regime_trabalho', '44h') if func else '44h' %}
+          <option value="44h"  {{ 'selected' if regime_atual == '44h'  }}>44h semanais (CLT padrão)</option>
+          <option value="48h"  {{ 'selected' if regime_atual == '48h'  }}>48h semanais (máximo CLT)</option>
+          <option value="36h"  {{ 'selected' if regime_atual == '36h'  }}>36h semanais</option>
+          <option value="32h"  {{ 'selected' if regime_atual == '32h'  }}>32h semanais</option>
+          <option value="30h"  {{ 'selected' if regime_atual == '30h'  }}>30h semanais</option>
+          <option value="5x2"  {{ 'selected' if regime_atual == '5x2'  }}>5x2 — 5 dias trabalho / 2 folgas consecutivas</option>
+        </select>
+      </div>
+      <div class="form-group" id="campo-folga-5x2" style="{{ '' if (func and func.get('regime_trabalho') == '5x2') else 'display:none;' }}">
+        <label>Data de início das folgas (5x2)</label>
+        <input type="date" name="folga_5x2_ref"
+               value="{{ func.get('folga_5x2_ref') or '' if func else '' }}"
+               id="folga-5x2-input" />
+        <p style="font-size:0.78rem; color:#8b949e; margin-top:0.3rem;">
+          Informe a data do primeiro dia de folga do ciclo 5x2 deste funcionário.
+          A partir desta data, ele folga 2 dias consecutivos a cada 7 dias.
+        </p>
+      </div>
+    </div>
+    <script>
+      function toggleFolga5x2() {
+        const v = document.getElementById('regime-select').value;
+        document.getElementById('campo-folga-5x2').style.display = v === '5x2' ? '' : 'none';
+      }
+    </script>
+
+    <hr style="border:none; border-top:1px solid #21262d; margin:1.5rem 0;" />
+
     <p class="secao-titulo">Escala de folgas — Domingos</p>
     <p style="font-size:0.82rem; color:#8b949e; margin-bottom:1rem;">
       Configure o ciclo de folgas de domingo no formato <strong style="color:#e6edf3;">folga{N} trabalha{M}</strong>.

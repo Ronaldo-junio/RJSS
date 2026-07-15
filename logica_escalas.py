@@ -9,6 +9,15 @@ CARGOS = {
 
 DIAS_PT = {0: 'segunda', 1: 'terca', 2: 'quarta', 3: 'quinta', 4: 'sexta', 5: 'sabado', 6: 'domingo'}
 
+REGIMES_TRABALHO = {
+    '44h': {'horas_semanais': 44, 'descricao': '44h semanais (CLT padrão)'},
+    '48h': {'horas_semanais': 48, 'descricao': '48h semanais (máximo CLT)'},
+    '36h': {'horas_semanais': 36, 'descricao': '36h semanais'},
+    '32h': {'horas_semanais': 32, 'descricao': '32h semanais'},
+    '30h': {'horas_semanais': 30, 'descricao': '30h semanais'},
+    '5x2': {'horas_semanais': None, 'descricao': '5x2 (5 dias trabalho, 2 folgas consecutivas)'},
+}
+
 
 # ── Feriados nacionais (fixos + móveis) ───────────────────────────────────────
 
@@ -54,6 +63,33 @@ def feriados_brasil(ano):
     return sorted(set(fixos + moveis))
 
 
+def horas_turno(turno_config):
+    """Calcula a duração em horas de um turno a partir de seu horário."""
+    from datetime import datetime as _dt
+    try:
+        inicio = _dt.strptime(turno_config.get('horario_inicio', '00:00'), '%H:%M')
+        fim = _dt.strptime(turno_config.get('horario_fim', '00:00'), '%H:%M')
+        diff = (fim - inicio).total_seconds()
+        if diff <= 0:
+            diff += 86400  # turno que passa da meia-noite
+        return diff / 3600
+    except Exception:
+        return 8.0
+
+
+def _is_folga_5x2(func, data):
+    """Retorna True se 'data' é dia de folga no regime 5x2 do funcionário."""
+    ref_str = func.get('folga_5x2_ref')
+    if not ref_str:
+        return False
+    try:
+        ref = date.fromisoformat(ref_str)
+    except Exception:
+        return False
+    # Ciclo de 7 dias: posições 0 e 1 = folga, 2-6 = trabalho
+    return (data - ref).days % 7 in (0, 1)
+
+
 def tempo_de_casa(func):
     try:
         return date.fromisoformat(func['data_admissao'])
@@ -77,7 +113,7 @@ def _is_domingo_folga(func, domingo):
     return posicao < domingos_folga
 
 
-def is_disponivel(func, data):
+def is_disponivel(func, data, horas_semana_func=0):
     fi, ff = func.get('ferias_inicio'), func.get('ferias_fim')
     if fi and ff:
         if date.fromisoformat(fi) <= data <= date.fromisoformat(ff):
@@ -90,13 +126,23 @@ def is_disponivel(func, data):
     if data.weekday() == 6 and _is_domingo_folga(func, data):
         return False
 
-    # Folga semanal fixa: sempre ocorre no dia configurado, independente de domingo
     folga_semana = func.get('folga_semana')
     if folga_semana:
         dias_inv = {v: k for k, v in DIAS_PT.items()}
         num = dias_inv.get(folga_semana)
         if num is not None and data.weekday() == num:
             return False
+
+    regime = func.get('regime_trabalho', '44h')
+
+    # Regime 5x2: verifica folga rotativa
+    if regime == '5x2' and _is_folga_5x2(func, data):
+        return False
+
+    # Regimes por horas: verifica limite semanal
+    info = REGIMES_TRABALHO.get(regime)
+    if info and info.get('horas_semanais') and horas_semana_func >= info['horas_semanais']:
+        return False
 
     return True
 
@@ -276,9 +322,11 @@ def distribuir_caixas(operadores, caixas_config, historico_caixas, turno_nome=''
 
 # ── Geração de dias ───────────────────────────────────────────────────────────
 
-def gerar_dia(funcionarios, config, data, historico_caixas=None):
+def gerar_dia(funcionarios, config, data, historico_caixas=None, horas_semana=None):
     if historico_caixas is None:
         historico_caixas = {}
+    if horas_semana is None:
+        horas_semana = {}
     alocados_ids = set()
     vacancias_criadas = {}
     turnos_resultado = {}
@@ -287,7 +335,7 @@ def gerar_dia(funcionarios, config, data, historico_caixas=None):
         turno_resultado = {}
         disponiveis_turno = [
             f for f in funcionarios
-            if f.get('turno') == turno_nome and is_disponivel(f, data)
+            if f.get('turno') == turno_nome and is_disponivel(f, data, horas_semana.get(f['id'], 0))
         ]
 
         for cargo, qtd in get_cargos_turno(turno_config).items():
@@ -472,21 +520,54 @@ def gerar_escala_semana(funcionarios, config, data_inicio, feriados_confirmados=
     dias = {}
     alertas = []
 
+    # Pre-computa horas de cada turno para rastreamento semanal
+    horas_por_turno = {nome: horas_turno(cfg) for nome, cfg in config.get('turnos', {}).items()}
+
+    horas_semana = {}        # {func_id: float} — resetado a cada ISO-semana
+    ultima_semana_iso = None
+
     for i in range(config.get('periodo_geracao_dias', 7)):
         data = data_inicio + timedelta(days=i)
         data_str = data.isoformat()
 
+        # Reseta e pré-popula ao cruzar fronteira de semana
+        semana_iso = data.isocalendar()[:2]
+        if semana_iso != ultima_semana_iso:
+            horas_semana = {}
+            ultima_semana_iso = semana_iso
+            # Conta horas já geradas (dias_existentes) nesta ISO-semana
+            seg = data - timedelta(days=data.weekday())
+            for d_off in range(7):
+                d_str = (seg + timedelta(days=d_off)).isoformat()
+                if d_str in dias_existentes:
+                    for t_nome, t_dados in dias_existentes[d_str].get('turnos', {}).items():
+                        h = horas_por_turno.get(t_nome, 8.0)
+                        for c_dados in t_dados.get('cargos', {}).values():
+                            for f_e in c_dados.get('funcionarios', []):
+                                if f_e.get('id'):
+                                    horas_semana[f_e['id']] = horas_semana.get(f_e['id'], 0) + h
+
         if data_str in dias_existentes:
-            # Dia já gerado: reutiliza exatamente — histórico já inclui este dia
             dias[data_str] = dias_existentes[data_str]
         elif data_str in feriados_confirmados:
-            dias[data_str] = gerar_dia_feriado(funcionarios, config, data, feriados_confirmados[data_str])
+            resultado_dia = gerar_dia_feriado(funcionarios, config, data, feriados_confirmados[data_str])
+            dias[data_str] = resultado_dia
+            for t_nome, t_dados in resultado_dia.get('turnos', {}).items():
+                h = horas_por_turno.get(t_nome, 8.0)
+                for c_dados in t_dados.get('cargos', {}).values():
+                    for f_e in c_dados.get('funcionarios', []):
+                        if f_e.get('id'):
+                            horas_semana[f_e['id']] = horas_semana.get(f_e['id'], 0) + h
         else:
-            dias[data_str] = gerar_dia(funcionarios, config, data, historico_caixas)
-            for turno_dados in dias[data_str]['turnos'].values():
-                for cargo_dados in turno_dados['cargos'].values():
-                    vagas = [f for f in cargo_dados['funcionarios'] if 'vaga' in f.get('tipo', '')]
+            dias[data_str] = gerar_dia(funcionarios, config, data, historico_caixas, horas_semana)
+            for t_nome, t_dados in dias[data_str]['turnos'].items():
+                h = horas_por_turno.get(t_nome, 8.0)
+                for c_dados in t_dados['cargos'].values():
+                    vagas = [f for f in c_dados['funcionarios'] if 'vaga' in f.get('tipo', '')]
                     if vagas:
-                        alertas.append(f"⚠ {data_str}: {len(vagas)} vaga(s) em {cargo_dados['nome']}")
+                        alertas.append(f"⚠ {data_str}: {len(vagas)} vaga(s) em {c_dados['nome']}")
+                    for f_e in c_dados['funcionarios']:
+                        if f_e.get('id'):
+                            horas_semana[f_e['id']] = horas_semana.get(f_e['id'], 0) + h
 
     return {'dias': dias, 'alertas': alertas}
