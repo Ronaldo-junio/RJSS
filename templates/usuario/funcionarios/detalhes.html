@@ -25,15 +25,6 @@
     <table style="font-size:0.88rem;">
       <tr><td style="color:#8b949e; padding:0.4rem 0.8rem 0.4rem 0; border:none; white-space:nowrap;">Admissão</td><td style="border:none;">{{ func.data_admissao }}</td></tr>
       <tr><td style="color:#8b949e; padding:0.4rem 0.8rem 0.4rem 0; border:none; white-space:nowrap;">Turno</td><td style="border:none;">{{ func.turno | title }}</td></tr>
-      <tr><td style="color:#8b949e; padding:0.4rem 0.8rem 0.4rem 0; border:none; white-space:nowrap;">Regime</td>
-          <td style="border:none;">
-            {% set regimes_label = {'44h':'44h (CLT padrão)','48h':'48h (máx. CLT)','36h':'36h','32h':'32h','30h':'30h','5x2':'5x2 (5 dias / 2 folgas)'} %}
-            {{ regimes_label.get(func.get('regime_trabalho','44h'), func.get('regime_trabalho','44h')) }}
-            {% if func.get('regime_trabalho') == '5x2' and func.get('folga_5x2_ref') %}
-              <span style="color:#8b949e; font-size:0.82rem;"> — folgas desde {{ func.folga_5x2_ref }}</span>
-            {% endif %}
-          </td>
-      </tr>
       <tr><td style="color:#8b949e; padding:0.4rem 0.8rem 0.4rem 0; border:none; white-space:nowrap;">Cargo principal</td><td style="border:none;">{{ cargos.get(func.cargo_primario, func.cargo_primario) }}</td></tr>
       <tr><td style="color:#8b949e; padding:0.4rem 0.8rem 0.4rem 0; border:none; white-space:nowrap;">Cargo secundário</td><td style="border:none;">{{ cargos.get(func.cargo_secundario, '—') if func.cargo_secundario else '—' }}</td></tr>
     </table>

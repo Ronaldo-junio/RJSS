@@ -65,6 +65,22 @@
         <input type="number" name="periodo_dias" value="{{ config.periodo_geracao_dias }}" min="1" max="31" />
       </div>
       <div class="form-group">
+        <label>Regime de trabalho</label>
+        <select name="regime_trabalho">
+          {% set r = config.get('regime_trabalho', '44h') %}
+          <option value="44h" {{ 'selected' if r == '44h' }}>44h semanais (CLT padrão)</option>
+          <option value="48h" {{ 'selected' if r == '48h' }}>48h semanais (máximo CLT)</option>
+          <option value="36h" {{ 'selected' if r == '36h' }}>36h semanais</option>
+          <option value="32h" {{ 'selected' if r == '32h' }}>32h semanais</option>
+          <option value="30h" {{ 'selected' if r == '30h' }}>30h semanais</option>
+          <option value="5x2" {{ 'selected' if r == '5x2' }}>5x2 — 5 dias trabalho / 2 folgas</option>
+        </select>
+        <p style="font-size:0.78rem; color:#8b949e; margin-top:0.3rem;">
+          O sistema distribui as folgas automaticamente para manter a cobertura mínima em cada dia.
+          As folgas de domingo seguem a rotação individual de cada funcionário.
+        </p>
+      </div>
+      <div class="form-group">
         <div class="checkbox-row" style="margin-top:1.5rem;">
           <input type="checkbox" id="turnos_fixos" name="turnos_fixos" {{ 'checked' if config.turnos_fixos }} />
           <label for="turnos_fixos">Turnos fixos ativados</label>
