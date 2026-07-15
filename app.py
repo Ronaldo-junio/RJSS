@@ -117,11 +117,11 @@ def acesso_usuario(f):
 
 # ── Auth ──────────────────────────────────────────────────────────────────────
 
-@app.route('/RJSS_Sistemas_Integrados/')
+@app.route('/')
 def index():
     return redirect(url_for('login'))
 
-@app.route('/RJSS_Sistemas_Integrados/login/', methods=['GET', 'POST'])
+@app.route('/login/', methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
         usuario = request.form.get('usuario', '').strip()
@@ -136,7 +136,7 @@ def login():
         flash('Usuário ou senha incorretos.', 'erro')
     return render_template('login.html')
 
-@app.route('/RJSS_Sistemas_Integrados/logout/')
+@app.route('/logout/')
 def logout():
     session.clear()
     return redirect(url_for('login'))
@@ -144,13 +144,13 @@ def logout():
 
 # ── Admin ─────────────────────────────────────────────────────────────────────
 
-@app.route('/RJSS_Sistemas_Integrados/admin/')
+@app.route('/admin/')
 @admin_required
 def painel_admin():
     users = load_users()
     return render_template('admin/painel.html', users=users)
 
-@app.route('/RJSS_Sistemas_Integrados/admin/adicionar/', methods=['GET', 'POST'])
+@app.route('/admin/adicionar/', methods=['GET', 'POST'])
 @admin_required
 def adicionar_usuario():
     if request.method == 'POST':
@@ -171,7 +171,7 @@ def adicionar_usuario():
                 return redirect(url_for('painel_admin'))
     return render_template('admin/adicionar_usuario.html')
 
-@app.route('/RJSS_Sistemas_Integrados/admin/excluir/<username>', methods=['POST'])
+@app.route('/admin/excluir/<username>', methods=['POST'])
 @admin_required
 def excluir_usuario(username):
     if username == 'admin':
@@ -185,7 +185,7 @@ def excluir_usuario(username):
     return redirect(url_for('painel_admin'))
 
 
-@app.route('/RJSS_Sistemas_Integrados/admin/reiniciar/', methods=['POST'])
+@app.route('/admin/reiniciar/', methods=['POST'])
 @admin_required
 def reiniciar_servidor():
     session.clear()
@@ -193,15 +193,15 @@ def reiniciar_servidor():
     os.execv(sys.executable, [sys.executable] + sys.argv)
 
 
-@app.route('/RJSS_Sistemas_Integrados/manual/')
+@app.route('/manual/')
 def manual_usuario():
     base = os.path.dirname(__file__)
-    return send_from_directory(base, 'Manual do Usuário.html')
+    return send_from_directory(base, 'manual.html')
 
 
 # ── Painel do usuário ─────────────────────────────────────────────────────────
 
-@app.route('/RJSS_Sistemas_Integrados/usuario/<username>/')
+@app.route('/usuario/<username>/')
 @acesso_usuario
 def painel_usuario(username):
     return render_template('usuario/painel.html', username=username)
@@ -209,13 +209,13 @@ def painel_usuario(username):
 
 # ── Funcionários ──────────────────────────────────────────────────────────────
 
-@app.route('/RJSS_Sistemas_Integrados/usuario/<username>/funcionarios/')
+@app.route('/usuario/<username>/funcionarios/')
 @acesso_usuario
 def lista_funcionarios(username):
     funcs = get_funcionarios(username)
     return render_template('usuario/funcionarios/lista.html', username=username, funcionarios=funcs, cargos=CARGOS)
 
-@app.route('/RJSS_Sistemas_Integrados/usuario/<username>/funcionarios/novo/', methods=['GET', 'POST'])
+@app.route('/usuario/<username>/funcionarios/novo/', methods=['GET', 'POST'])
 @acesso_usuario
 def novo_funcionario(username):
     if request.method == 'POST':
@@ -230,7 +230,7 @@ def novo_funcionario(username):
     return render_template('usuario/funcionarios/form.html', username=username, func=None, cargos=CARGOS,
                            dias_semana=DIAS_PT)
 
-@app.route('/RJSS_Sistemas_Integrados/usuario/<username>/funcionarios/<func_id>/')
+@app.route('/usuario/<username>/funcionarios/<func_id>/')
 @acesso_usuario
 def detalhes_funcionario(username, func_id):
     funcs = get_funcionarios(username)
@@ -240,7 +240,7 @@ def detalhes_funcionario(username, func_id):
         return redirect(url_for('lista_funcionarios', username=username))
     return render_template('usuario/funcionarios/detalhes.html', username=username, func=func, cargos=CARGOS)
 
-@app.route('/RJSS_Sistemas_Integrados/usuario/<username>/funcionarios/<func_id>/editar/', methods=['GET', 'POST'])
+@app.route('/usuario/<username>/funcionarios/<func_id>/editar/', methods=['GET', 'POST'])
 @acesso_usuario
 def editar_funcionario(username, func_id):
     funcs = get_funcionarios(username)
@@ -259,7 +259,7 @@ def editar_funcionario(username, func_id):
     return render_template('usuario/funcionarios/form.html', username=username, func=funcs[idx],
                            cargos=CARGOS, dias_semana=DIAS_PT)
 
-@app.route('/RJSS_Sistemas_Integrados/usuario/<username>/funcionarios/<func_id>/excluir/', methods=['POST'])
+@app.route('/usuario/<username>/funcionarios/<func_id>/excluir/', methods=['POST'])
 @acesso_usuario
 def excluir_funcionario(username, func_id):
     funcs = [f for f in get_funcionarios(username) if f['id'] != func_id]
@@ -267,7 +267,7 @@ def excluir_funcionario(username, func_id):
     flash('Funcionário excluído.', 'sucesso')
     return redirect(url_for('lista_funcionarios', username=username))
 
-@app.route('/RJSS_Sistemas_Integrados/usuario/<username>/funcionarios/<func_id>/atestado/', methods=['POST'])
+@app.route('/usuario/<username>/funcionarios/<func_id>/atestado/', methods=['POST'])
 @acesso_usuario
 def add_atestado(username, func_id):
     funcs = get_funcionarios(username)
@@ -285,13 +285,13 @@ def add_atestado(username, func_id):
 
 # ── Escalas ───────────────────────────────────────────────────────────────────
 
-@app.route('/RJSS_Sistemas_Integrados/usuario/<username>/escalas/')
+@app.route('/usuario/<username>/escalas/')
 @acesso_usuario
 def lista_escalas(username):
     escalas = get_escalas(username)
     return render_template('usuario/escalas/lista.html', username=username, escalas=escalas)
 
-@app.route('/RJSS_Sistemas_Integrados/usuario/<username>/escalas/<escala_id>/')
+@app.route('/usuario/<username>/escalas/<escala_id>/')
 @acesso_usuario
 def ver_escala(username, escala_id):
     escalas = get_escalas(username)
@@ -301,7 +301,7 @@ def ver_escala(username, escala_id):
         return redirect(url_for('lista_escalas', username=username))
     return render_template('usuario/escalas/semana.html', username=username, escala=escala, cargos=CARGOS)
 
-@app.route('/RJSS_Sistemas_Integrados/usuario/<username>/escalas/<escala_id>/imprimir/')
+@app.route('/usuario/<username>/escalas/<escala_id>/imprimir/')
 @acesso_usuario
 def imprimir_escala(username, escala_id):
     escalas = get_escalas(username)
@@ -317,7 +317,7 @@ def imprimir_escala(username, escala_id):
     escala_print = dict(escala, dias=dias_filtrados)
     return render_template('usuario/escalas/imprimir.html', username=username, escala=escala_print, cargos=CARGOS)
 
-@app.route('/RJSS_Sistemas_Integrados/usuario/<username>/escalas/<escala_id>/excluir/', methods=['POST'])
+@app.route('/usuario/<username>/escalas/<escala_id>/excluir/', methods=['POST'])
 @acesso_usuario
 def excluir_escala(username, escala_id):
     escalas = [e for e in get_escalas(username) if e['id'] != escala_id]
@@ -326,7 +326,7 @@ def excluir_escala(username, escala_id):
     return redirect(url_for('lista_escalas', username=username))
 
 
-@app.route('/RJSS_Sistemas_Integrados/usuario/<username>/escalas/dia-json/')
+@app.route('/usuario/<username>/escalas/dia-json/')
 @acesso_usuario
 def dia_json_endpoint(username):
     data_str = request.args.get('data', '')
@@ -358,7 +358,7 @@ def _local_para_cargo(local, caixas_config):
     return (None, None, None, None)
 
 
-@app.route('/RJSS_Sistemas_Integrados/usuario/<username>/escalas/adicionar/', methods=['GET', 'POST'])
+@app.route('/usuario/<username>/escalas/adicionar/', methods=['GET', 'POST'])
 @acesso_usuario
 def adicionar_escala(username):
     config = get_config(username)
@@ -463,18 +463,18 @@ def adicionar_escala(username):
 
 # ── Gerar Escalas ─────────────────────────────────────────────────────────────
 
-@app.route('/RJSS_Sistemas_Integrados/usuario/<username>/gerar-escalas/caixas-json/')
+@app.route('/usuario/<username>/gerar-escalas/caixas-json/')
 @acesso_usuario
 def caixas_json(username):
     return jsonify(get_config(username).get('caixas', []))
 
-@app.route('/RJSS_Sistemas_Integrados/usuario/<username>/gerar-escalas/')
+@app.route('/usuario/<username>/gerar-escalas/')
 @acesso_usuario
 def gerar_escalas(username):
     config = get_config(username)
     return render_template('usuario/gerar_escalas/index.html', username=username, config=config)
 
-@app.route('/RJSS_Sistemas_Integrados/usuario/<username>/gerar-escalas/configuracoes/', methods=['GET', 'POST'])
+@app.route('/usuario/<username>/gerar-escalas/configuracoes/', methods=['GET', 'POST'])
 @acesso_usuario
 def configuracoes_escala(username):
     config = get_config(username)
@@ -525,7 +525,7 @@ def configuracoes_escala(username):
         return redirect(url_for('gerar_escalas', username=username))
     return render_template('usuario/gerar_escalas/configuracoes.html', username=username, config=config)
 
-@app.route('/RJSS_Sistemas_Integrados/usuario/<username>/gerar-escalas/gerar/', methods=['POST'])
+@app.route('/usuario/<username>/gerar-escalas/gerar/', methods=['POST'])
 @acesso_usuario
 def processar_geracao(username):
     data_inicio_str = request.form.get('data_inicio', '')
@@ -582,7 +582,7 @@ def processar_geracao(username):
     flash('Escala gerada com sucesso.', 'sucesso')
     return redirect(url_for('ver_escala', username=username, escala_id=escala['id']))
 
-@app.route('/RJSS_Sistemas_Integrados/usuario/<username>/gerar-escalas/feriados/', methods=['GET', 'POST'])
+@app.route('/usuario/<username>/gerar-escalas/feriados/', methods=['GET', 'POST'])
 @acesso_usuario
 def confirmar_feriados(username):
     pendente = session.get('escala_pendente')

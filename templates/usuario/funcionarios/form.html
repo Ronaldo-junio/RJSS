@@ -2,8 +2,8 @@
 {% block titulo %}{{ 'Editar' if func else 'Novo' }} Funcionário{% endblock %}
 
 {% block nav_extra %}
-  <a href="/RJSS_Sistemas_Integrados/usuario/{{ username }}/">Início</a>
-  <a href="/RJSS_Sistemas_Integrados/usuario/{{ username }}/funcionarios/">Funcionários</a>
+  <a href="/usuario/{{ username }}/">Início</a>
+  <a href="/usuario/{{ username }}/funcionarios/">Funcionários</a>
 {% endblock %}
 
 {% block conteudo %}
@@ -192,7 +192,7 @@
     </div>
 
     <div class="form-acoes">
-      <a href="/RJSS_Sistemas_Integrados/usuario/{{ username }}/funcionarios/" class="btn btn-cinza">Cancelar</a>
+      <a href="/usuario/{{ username }}/funcionarios/" class="btn btn-cinza">Cancelar</a>
       <button type="submit" class="btn btn-verde">{{ 'Salvar alterações' if func else 'Cadastrar funcionário' }}</button>
     </div>
 

@@ -225,17 +225,17 @@
 <img class="bg-logo" src="/static/logo.png" alt="" aria-hidden="true" />
 
 <header>
-  <a class="header-titulo" href="/RJSS_Sistemas_Integrados/usuario/{{ session.usuario }}/">
+  <a class="header-titulo" href="/usuario/{{ session.usuario }}/">
     <img src="/static/logo.png" alt="RJSS" />
     RJSS Sistemas Integrados
   </a>
   <nav>
     {% if session.papel == 'admin' %}
-      <a href="/RJSS_Sistemas_Integrados/admin/">Painel Admin</a>
+      <a href="/admin/">Painel Admin</a>
     {% endif %}
     {% block nav_extra %}{% endblock %}
-    <a href="/RJSS_Sistemas_Integrados/manual/" target="_blank" title="Manual do usuário">📖 Manual</a>
-    <a href="/RJSS_Sistemas_Integrados/logout/" class="sair">Sair</a>
+    <a href="/manual/" target="_blank" title="Manual do usuário">📖 Manual</a>
+    <a href="/logout/" class="sair">Sair</a>
   </nav>
 </header>
 

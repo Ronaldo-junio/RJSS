@@ -2,8 +2,8 @@
 {% block titulo %}Confirmar Feriados{% endblock %}
 
 {% block nav_extra %}
-  <a href="/RJSS_Sistemas_Integrados/usuario/{{ username }}/">Início</a>
-  <a href="/RJSS_Sistemas_Integrados/usuario/{{ username }}/gerar-escalas/">Gerar Escalas</a>
+  <a href="/usuario/{{ username }}/">Início</a>
+  <a href="/usuario/{{ username }}/gerar-escalas/">Gerar Escalas</a>
 {% endblock %}
 
 {% block conteudo %}
@@ -42,7 +42,7 @@
   {% endfor %}
 
   <div class="form-acoes">
-    <a href="/RJSS_Sistemas_Integrados/usuario/{{ username }}/gerar-escalas/" class="btn btn-cinza">Cancelar</a>
+    <a href="/usuario/{{ username }}/gerar-escalas/" class="btn btn-cinza">Cancelar</a>
     <button type="submit" class="btn btn-verde">Confirmar e gerar escala</button>
   </div>
 </form>

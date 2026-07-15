@@ -2,8 +2,8 @@
 {% block titulo %}Escala {{ escala.data_inicio }}{% endblock %}
 
 {% block nav_extra %}
-  <a href="/RJSS_Sistemas_Integrados/usuario/{{ username }}/">Início</a>
-  <a href="/RJSS_Sistemas_Integrados/usuario/{{ username }}/escalas/">Escalas</a>
+  <a href="/usuario/{{ username }}/">Início</a>
+  <a href="/usuario/{{ username }}/escalas/">Escalas</a>
 {% endblock %}
 
 {% block extra_css %}
@@ -47,9 +47,9 @@
 <div class="page-header">
   <h1>Escala: {{ escala.data_inicio }} — {{ escala.data_fim }}</h1>
   <div style="display:flex;gap:0.5rem;flex-wrap:wrap;">
-    <a href="/RJSS_Sistemas_Integrados/usuario/{{ username }}/escalas/{{ escala.id }}/imprimir/" class="btn btn-cinza" target="_blank">🖨 Imprimir tudo</a>
+    <a href="/usuario/{{ username }}/escalas/{{ escala.id }}/imprimir/" class="btn btn-cinza" target="_blank">🖨 Imprimir tudo</a>
     <button class="btn btn-cinza" onclick="abrirPainelPrint()">📅 Selecionar dias</button>
-    <a href="/RJSS_Sistemas_Integrados/usuario/{{ username }}/escalas/" class="btn btn-cinza">← Voltar</a>
+    <a href="/usuario/{{ username }}/escalas/" class="btn btn-cinza">← Voltar</a>
   </div>
 </div>
 
@@ -145,7 +145,7 @@
 </div>
 
 <script>
-  var BASE_PRINT = "/RJSS_Sistemas_Integrados/usuario/{{ username }}/escalas/{{ escala.id }}/imprimir/";
+  var BASE_PRINT = "/usuario/{{ username }}/escalas/{{ escala.id }}/imprimir/";
 
   function abrirPainelPrint() {
     document.getElementById('painel-print').classList.add('aberto');

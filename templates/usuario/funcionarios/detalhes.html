@@ -2,16 +2,16 @@
 {% block titulo %}{{ func.nome }}{% endblock %}
 
 {% block nav_extra %}
-  <a href="/RJSS_Sistemas_Integrados/usuario/{{ username }}/">Início</a>
-  <a href="/RJSS_Sistemas_Integrados/usuario/{{ username }}/funcionarios/">Funcionários</a>
+  <a href="/usuario/{{ username }}/">Início</a>
+  <a href="/usuario/{{ username }}/funcionarios/">Funcionários</a>
 {% endblock %}
 
 {% block conteudo %}
 <div class="page-header">
   <h1>{{ func.nome }}</h1>
   <div style="display:flex;gap:0.5rem;">
-    <a href="/RJSS_Sistemas_Integrados/usuario/{{ username }}/funcionarios/{{ func.id }}/editar/" class="btn btn-azul">Editar</a>
-    <form method="POST" action="/RJSS_Sistemas_Integrados/usuario/{{ username }}/funcionarios/{{ func.id }}/excluir/"
+    <a href="/usuario/{{ username }}/funcionarios/{{ func.id }}/editar/" class="btn btn-azul">Editar</a>
+    <form method="POST" action="/usuario/{{ username }}/funcionarios/{{ func.id }}/excluir/"
           onsubmit="return confirm('Excluir este funcionário?')">
       <button type="submit" class="btn btn-vermelho">Excluir</button>
     </form>
@@ -122,7 +122,7 @@
 
   <details>
     <summary style="cursor:pointer; font-size:0.85rem; color:#58a6ff; margin-bottom:0.8rem;">+ Registrar novo atestado</summary>
-    <form method="POST" action="/RJSS_Sistemas_Integrados/usuario/{{ username }}/funcionarios/{{ func.id }}/atestado/" style="margin-top:0.8rem;">
+    <form method="POST" action="/usuario/{{ username }}/funcionarios/{{ func.id }}/atestado/" style="margin-top:0.8rem;">
       <div class="form-grid">
         <div class="form-group">
           <label>Início</label>

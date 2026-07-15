@@ -2,28 +2,28 @@
 {% block titulo %}Gerar Escalas{% endblock %}
 
 {% block nav_extra %}
-  <a href="/RJSS_Sistemas_Integrados/usuario/{{ username }}/">Início</a>
-  <a href="/RJSS_Sistemas_Integrados/usuario/{{ username }}/escalas/">Escalas</a>
+  <a href="/usuario/{{ username }}/">Início</a>
+  <a href="/usuario/{{ username }}/escalas/">Escalas</a>
 {% endblock %}
 
 {% block conteudo %}
 <div class="page-header">
   <h1>Gerar Escalas</h1>
-  <a href="/RJSS_Sistemas_Integrados/usuario/{{ username }}/gerar-escalas/configuracoes/" class="btn btn-cinza">⚙ Configurações do setor</a>
+  <a href="/usuario/{{ username }}/gerar-escalas/configuracoes/" class="btn btn-cinza">⚙ Configurações do setor</a>
 </div>
 
 <div style="display:grid; grid-template-columns: 1fr 1fr; gap:1rem; align-items:start;">
 
   <div class="card">
     <p class="secao-titulo">Nova escala — Linha de Frente</p>
-    <form method="POST" action="/RJSS_Sistemas_Integrados/usuario/{{ username }}/gerar-escalas/gerar/">
+    <form method="POST" action="/usuario/{{ username }}/gerar-escalas/gerar/">
       <div class="form-group" style="margin-bottom:1.2rem;">
         <label>Data de início da escala</label>
         <input type="date" name="data_inicio" required />
       </div>
       <p style="font-size:0.82rem; color:#8b949e; margin-bottom:1.2rem;">
         Período de geração: <strong style="color:#e6edf3;">{{ config.periodo_geracao_dias }} dias</strong>
-        — altere em <a href="/RJSS_Sistemas_Integrados/usuario/{{ username }}/gerar-escalas/configuracoes/" style="color:#58a6ff;">configurações</a>.
+        — altere em <a href="/usuario/{{ username }}/gerar-escalas/configuracoes/" style="color:#58a6ff;">configurações</a>.
       </p>
       <p style="font-size:0.82rem; color:#8b949e; margin-bottom:1.5rem;">
         Turnos fixos:

@@ -154,7 +154,7 @@
     </span>
     <span>
       <span class="info">Logado como <strong>admin</strong></span>
-      <a class="sair" href="/RJSS_Sistemas_Integrados/logout/">Sair</a>
+      <a class="sair" href="/logout/">Sair</a>
     </span>
   </header>
 
@@ -169,11 +169,11 @@
     <div class="topo-acao">
       <h2>Usuários cadastrados</h2>
       <div style="display:flex; gap:0.5rem;">
-        <form method="POST" action="/RJSS_Sistemas_Integrados/admin/reiniciar/"
+        <form method="POST" action="/admin/reiniciar/"
               onsubmit="return confirm('Reiniciar o servidor agora?')">
           <button type="submit" class="btn btn-laranja">↺ Reiniciar servidor</button>
         </form>
-        <a href="/RJSS_Sistemas_Integrados/admin/adicionar/" class="btn btn-verde">+ Adicionar usuário</a>
+        <a href="/admin/adicionar/" class="btn btn-verde">+ Adicionar usuário</a>
       </div>
     </div>
 
@@ -194,9 +194,9 @@
           </td>
           <td>
             <div class="acoes">
-              <a href="/RJSS_Sistemas_Integrados/usuario/{{ nome }}/" class="btn btn-azul">Acessar</a>
+              <a href="/usuario/{{ nome }}/" class="btn btn-azul">Acessar</a>
               {% if nome != 'admin' %}
-              <form method="POST" action="/RJSS_Sistemas_Integrados/admin/excluir/{{ nome }}"
+              <form method="POST" action="/admin/excluir/{{ nome }}"
                     onsubmit="return confirm('Tem certeza que deseja excluir o usuário {{ nome }}?')">
                 <button type="submit" class="btn btn-vermelho">Excluir</button>
               </form>

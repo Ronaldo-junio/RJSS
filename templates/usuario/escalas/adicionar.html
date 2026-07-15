@@ -2,8 +2,8 @@
 {% block titulo %}Editar Dia{% endblock %}
 
 {% block nav_extra %}
-  <a href="/RJSS_Sistemas_Integrados/usuario/{{ username }}/">Início</a>
-  <a href="/RJSS_Sistemas_Integrados/usuario/{{ username }}/escalas/">Escalas</a>
+  <a href="/usuario/{{ username }}/">Início</a>
+  <a href="/usuario/{{ username }}/escalas/">Escalas</a>
 {% endblock %}
 
 {% block extra_css %}
@@ -54,7 +54,7 @@
 {% block conteudo %}
 <div class="page-header">
   <h1>Editar dia completo</h1>
-  <a href="/RJSS_Sistemas_Integrados/usuario/{{ username }}/escalas/" class="btn btn-cinza">← Voltar</a>
+  <a href="/usuario/{{ username }}/escalas/" class="btn btn-cinza">← Voltar</a>
 </div>
 
 {% with msgs = get_flashed_messages(with_categories=true) %}
@@ -113,7 +113,7 @@
     </div>
 
     <div class="form-acoes" style="margin-top:1rem;">
-      <a href="/RJSS_Sistemas_Integrados/usuario/{{ username }}/escalas/" class="btn btn-cinza">Cancelar</a>
+      <a href="/usuario/{{ username }}/escalas/" class="btn btn-cinza">Cancelar</a>
       <button type="submit" class="btn btn-azul" id="btn-salvar">Salvar dia</button>
     </div>
   </form>
@@ -221,7 +221,7 @@ async function carregarDia() {
   if (!data) return;
   document.getElementById('input-data').value = data;
 
-  const res = await fetch(`/RJSS_Sistemas_Integrados/usuario/{{ username }}/escalas/dia-json/?data=${data}`);
+  const res = await fetch(`/usuario/{{ username }}/escalas/dia-json/?data=${data}`);
   const json = await res.json();
   const aviso = document.getElementById('aviso-dia');
   const avisoTexto = document.getElementById('aviso-texto');
